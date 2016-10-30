@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavController, ModalController, ToastController, Content, ActionSheetController, Events } from 'ionic-angular';
+import { Observable } from 'rxjs/Observable';  
 
 import { List } from '../../shared/interfaces';
 import { ListCreatePage } from '../list-create/list-create';
@@ -150,7 +151,9 @@ export class ListsPage implements OnInit {
     self.dataService.getListsRef().orderByPriority().equalTo(priority).once('value').then(function (dataSnapshot) {
       let key = Object.keys(dataSnapshot.val())[0];
       let newList: List = self.mappingsService.getList(dataSnapshot.val()[key], key);
-      self.newLists.push(newList);
+      console.log("lets share:"+key);
+      self.dataService.shareList(key);
+      //self.newLists.push(newList);
     });
   }
 
@@ -201,14 +204,24 @@ export class ListsPage implements OnInit {
     if (startFrom < 0)
       startFrom = 0;
     if (self.segment === 'all') {
-      this.dataService.getListsRef().orderByPriority().startAt(startFrom).endAt(self.start).once('value', function (snapshot) {
+      /*this.dataService.getListsRef().orderByPriority().startAt(startFrom).endAt(self.start).once('value', function (snapshot) {
         self.itemsService.reversedItems<List>(self.mappingsService.getLists(snapshot)).forEach(function (list) {
           self.lists.push(list);
         });
         self.start -= (self.pageSize + 1);
         self.events.publish('lists:viewed');
         self.loading = false;
+      });*/
+      self.dataService.getUserListsRef().child(self.authService.getLoggedInUser().uid).on('child_added', function(snap){
+        console.log("UserListsRef -> child_added", snap.key);
+        var listKey:string = snap.key;
+        self.dataService.getListsRef().child(listKey).on('value', function(listSnap) {
+            self.lists.push(self.mappingsService.getList(listSnap.val(), listKey));
+        });
       });
+      self.start -= (self.pageSize + 1);
+      self.events.publish('lists:viewed');
+      self.loading = false;
     } else {
       self.favoriteListKeys.forEach(key => {
         this.dataService.getListsRef().child(key).once('value')
@@ -241,12 +254,12 @@ export class ListsPage implements OnInit {
       self.segment = 'all';
       // empty current lists
       self.lists = [];
-      self.dataService.loadLists().then(function (snapshot) {
+      /*self.dataService.loadLists().then(function (snapshot) {
         self.itemsService.reversedItems<List>(self.mappingsService.getLists(snapshot)).forEach(function (list) {
           if (list.name.toLowerCase().includes(self.queryText.toLowerCase()))
             self.lists.push(list);
         });
-      });
+      });*/
     } else { // text cleared..
       this.loadLists(true);
     }
@@ -393,6 +406,10 @@ export class ListsPage implements OnInit {
         ]
     });
     actionSheet.present();
+  }
+
+  mail(){
+    
   }
 
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 //import { AngularFire , FirebaseListObservable } from 'angularfire2';
+import { Observable } from 'rxjs/Observable';  
 
 import { AuthService } from '../../shared/services/auth.service';
 import { List, ListItem, ListComment } from '../interfaces';
@@ -13,19 +14,11 @@ export class DataService {
     usersRef: any;
     listsRef: any;
     itemsRef: any;
+    userListsRef: any;
     commentsRef: any ;
     statisticsRef: any;
     storageRef: any;
     connectionRef: any;
-
-    /*databaseRef: FirebaseListObservable<any>;
-    usersRef: FirebaseListObservable<any>;
-    listsRef: FirebaseListObservable<any>;
-    itemsRef: FirebaseListObservable<any>;
-    commentsRef: FirebaseListObservable<any>;
-    statisticsRef: FirebaseListObservable<any>;
-    storageRef: FirebaseListObservable<any>;
-    connectionRef: FirebaseListObservable<any>;*/
 
     defaultImageUrl: string;
     connected: boolean = false;
@@ -37,19 +30,11 @@ export class DataService {
         this.usersRef = firebase.database().ref('users');
         this.listsRef = firebase.database().ref('lists');
         this.itemsRef = firebase.database().ref('items');
+        this.userListsRef = firebase.database().ref('user-lists');
         this.commentsRef = firebase.database().ref('comments');
         this.statisticsRef = firebase.database().ref('statistics');
         this.storageRef = firebase.storage().ref();
         this.connectionRef = firebase.database().ref('.info/connected');
-
-        //this.databaseRef    = af.database.list('/');
-        /*this.usersRef       = af.database.list('/users');
-        this.listsRef       = af.database.list('/lists');
-        this.itemsRef       = af.database.list('/items');
-        this.commentsRef    = af.database.list('/comments');
-        this.statisticsRef  = af.database.list('/statistics');
-        //this.storageRef     = af.storage.ref();
-        this.connectionRef  = af.database.list('.info/connected');*/
 
         try {
             self.checkFirebaseConnection();
@@ -119,6 +104,7 @@ export class DataService {
             }
             console.log('commited', snapshot.val());
         }, false);
+                
     }
 
     getDatabaseRef() {
@@ -141,8 +127,7 @@ export class DataService {
         return this.defaultImageUrl;
     }
 
-   getTotalLists() {
-
+    getTotalLists() {
         return this.statisticsRef.child('lists').once('value');
     }
 
@@ -166,43 +151,73 @@ export class DataService {
         return this.usersRef;
     }
 
+    getUserListsRef() {
+        return this.userListsRef;
+    }
+
     getStorageRef() {
         return this.storageRef;
     }
 
     getListItemsRef(listKey: string) {
-        /*return this.af.database.list('/items', {
-            query: {
-                orderByChild: 'list',
-                equalTo: listKey
-            }
-        });*/
         return this.itemsRef.orderByChild('list').equalTo(listKey);
     }
 
     getListCommentsRef(listKey: string) {
         return this.commentsRef.orderByChild('list').equalTo(listKey);
-       /* return this.af.database.list('/comments', {
-            query: {
-                orderByChild: 'list',
-                equalTo: listKey
-            }
-        });*/
     }
 
     loadLists() {
+        //loadAllLists;
+        return this.loadListsByUser();
+    }
+
+    loadAllLists() {
         return this.listsRef.once('value');
     }
 
-   submitList(list: List, priority: number) {
+    loadListsByUser() : Observable<List>{
+       var userKey: string = firebase.auth().currentUser.uid;
+        var userLists = this.userListsRef.child(userKey);
+         /*userLists.on('child_added', function(snapshot) {
+            var listKey:string = snapshot.key();
+            var listRef = this.listsRef.child(listKey);
+            listRef.on('value', function(list) {
+               console.log(list);
+            });
+        });*/
+        return Observable.create(observer => {
+
+            let listener =  userLists.on('child_added', snapshot => {
+                var listKey:string = snapshot.key();
+                var listRef = this.listsRef.child(listKey);
+                listRef.on('value', function(list) {
+                    observer.next(list);
+                });
+                
+            }, observer.error);
+
+            return () => {
+                this.userListsRef.off('child_added', listener);
+            };
+        });
+    }
+
+    submitList(list: List, priority: number) {
         var newListRef = this.listsRef.push();
         this.statisticsRef.child('lists').set(priority);
         console.log(priority);
         return newListRef.setWithPriority(list, priority);
     }
 
-    addListToFavorites(userKey: string, listKey: string) {
-        return this.usersRef.child(userKey + '/favorites/' + listKey).set(true);
+    shareList(listKey: string) {
+        console.log("sharing list: "+listKey);
+        var userKey: string = firebase.auth().currentUser.uid;
+        return this.userListsRef.child(userKey).child(listKey).set(true);
+    }
+    unshareList(listKey: string) {
+        var userKey: string = firebase.auth().currentUser.uid;
+        return this.userListsRef.child(userKey).child(listKey).set(null);
     }
 
     getFavoriteLists(user: string) {
@@ -214,6 +229,21 @@ export class DataService {
             image: true
         });
     }
+
+    addFriend(user1: string, user2: string){
+        var updates = {};
+        updates['/users/' + user1 + '/friends/' + user2] = true;
+        updates['/users/' + user2 + '/friends/' + user1] = true;
+        return firebase.database().ref().update(updates);
+    }
+
+    removeFriend(user1: string, user2: string){
+        var updates = {};
+        updates['/users/' + user1 + '/friends/' + user2] = null;
+        updates['/users/' + user2 + '/friends/' + user1] = null;
+        return firebase.database().ref().update(updates);
+    }
+
 
     getListItems(listKey: string) {
         return this.itemsRef.orderByChild('list').equalTo(listKey).once('value');
@@ -227,8 +257,13 @@ export class DataService {
         return this.itemsRef.child(listKey + '/items').once('value')
             .then((snapshot) => {
                 let numberOfItems = snapshot == null ? 0 : snapshot.val();
-                this.itemsRef.child(listKey + '/items').set(numberOfItems + 1);
+                this.listsRef.child(listKey + '/items').set(numberOfItems + 1);
             });
+    }
+
+    updateListItem(itemKey: string, text:string, qt:number): any {
+        this.itemsRef.child(itemKey+'text').set(text);
+        return this.itemsRef.child(itemKey+'qt').set(qt);
     }
 
     updateListItemState(itemKey: string, state: number): any {
@@ -242,7 +277,7 @@ export class DataService {
         return this.itemsRef.child(listKey + '/items').once('value')
             .then((snapshot) => {
                 let numberOfItems = snapshot == null ? 0 : snapshot.val();
-                this.itemsRef.child(listKey + '/items').set(numberOfItems - 1);
+                this.listsRef.child(listKey + '/items').set(numberOfItems - 1);
             });
     }        
 
@@ -279,7 +314,16 @@ export class DataService {
         return this.listsRef.orderByChild('user/uid').equalTo(userUid).once('value');
     }
 
+    getOnlyUserLists(userUid: string) {
+        return this.listsRef.orderByChild('user/uid').equalTo(userUid).once('value');
+    }
+
     getUserComments(userUid: string) {
         return this.commentsRef.orderByChild('user/uid').equalTo(userUid).once('value');
     }
+
+    getUserFriends(userUid: string) {
+        return this.usersRef.child(userUid + '/friends').once('value');
+    }
+
 }

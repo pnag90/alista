@@ -115,6 +115,7 @@ export class LoginPage implements OnInit {
             duration: 3000,
             position: 'botttom'
         });
+        toast.present();
     }
     errorLoginHandler(error): void{
          // Handle Errors here.

@@ -65,7 +65,7 @@ export class ResetPasswordPage {
                     }]
                 });
                 errorAlert.present();*/
-                    let toast = this.toastCtrl.create({
+                let toast = this.toastCtrl.create({
                     message: errorMessage,
                     duration: 4000,
                     position: 'top'
@@ -73,6 +73,10 @@ export class ResetPasswordPage {
                 toast.present();
             });
         }
+    }
+
+    elementChanged(email:any){
+        this.emailChanged = true;
     }
 
 }

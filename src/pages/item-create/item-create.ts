@@ -13,6 +13,7 @@ export class ItemCreatePage implements OnInit {
 
   createItemForm: FormGroup;
   item: AbstractControl;
+  quantity: AbstractControl;
   listKey: string;
   loaded: boolean = false;
 
@@ -30,10 +31,12 @@ export class ItemCreatePage implements OnInit {
     this.listKey = this.navParams.get('listKey');
 
     this.createItemForm = this.fb.group({
-      'item': ['', Validators.compose([Validators.required, Validators.minLength(4)])]
+      'item': ['', Validators.compose([Validators.required, Validators.minLength(4)])],
+      'quantity': ['', Validators.compose([Validators.minLength(1)])]
     });
 
     this.item = this.createItemForm.controls['item'];
+    this.quantity = this.createItemForm.controls['quantity'];
     this.loaded = true;
   }
 
@@ -65,7 +68,7 @@ export class ItemCreatePage implements OnInit {
           list: self.listKey,
           user: user,
           text: itemForm.item,
-          qt: itemForm.qt || 1,
+          qt: itemForm.quantity || 1,
           category: itemForm.category || null,
           state: 0,
           dateCreated: new Date().toString()

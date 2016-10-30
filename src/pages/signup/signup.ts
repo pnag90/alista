@@ -73,7 +73,7 @@ export class SignupPage implements OnInit {
 
             this.authService.registerUser(newUser)
                 .then(function (result) {
-                    self.authService.addUser(signupForm.username, signupForm.dateOfBirth, self.authService.getLoggedInUser().uid);
+                    self.authService.addUser(signupForm.username, signupForm.dateOfBirth, signupForm.email, self.authService.getLoggedInUser().uid);
                     loader.dismiss()
                         .then(() => {
                             self.viewCtrl.dismiss({

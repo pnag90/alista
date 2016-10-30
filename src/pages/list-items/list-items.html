@@ -14,12 +14,12 @@
         <img src="assets/images/ring.gif" style="display:block; margin:auto" />
     </div>
     <ion-list *ngIf="itemsLoaded">
-        <ion-item-sliding #item *ngFor="let item of items" text-wrap >
-            <ion-item (click)="selectItem(item)">
+        <ion-item *ngFor="let item of items" text-wrap >
+            <ion-item-sliding (click)="selectItem(item)">
                 <h2>{{item.text}}</h2>
                 <p>{{item.user.username}}</p>
                 <ion-note>{{item.state}}</ion-note>
-            </ion-item>
+            </ion-item-sliding>
 
             <ion-item-options side="right">
                 <button ion-button color="danger" (click)="removeItem(item)">
@@ -28,10 +28,10 @@
                 </button>
             </ion-item-options>
 
-        </ion-item-sliding>
+        </ion-item>
     </ion-list>
     
     <ion-fab right bottom>
-        <button ion-fab color="primary"><ion-icon name="create" (click)="createItem()"></ion-icon></button>
+        <button ion-fab color="primary"><ion-icon name="add-circle" (click)="createItem()"></ion-icon></button>
     </ion-fab>
 </ion-content>

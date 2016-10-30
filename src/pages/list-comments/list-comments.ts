@@ -118,7 +118,7 @@ export class ListCommentsPage implements OnInit {
         var self = this;
         let currentUser = self.authService.getLoggedInUser();
         if (currentUser != null) {
-            self.dataService.addListToFavorites(currentUser.uid, self.listKey)
+            /*self.dataService.addListToFavorites(currentUser.uid, self.listKey)
                 .then(function () {
                     let toast = self.toastCtrl.create({
                         message: 'Added to favorites',
@@ -126,7 +126,7 @@ export class ListCommentsPage implements OnInit {
                         position: 'top'
                     });
                     toast.present();
-                });
+                });*/
         } else {
             let toast = self.toastCtrl.create({
                 message: 'This action is available only for authenticated users',

@@ -72,6 +72,8 @@ export class ListCreatePage implements OnInit {
 
           self.dataService.submitList(newList, newPriority)
             .then(function (snapshot) {
+              console.log("created");
+            
               loader.dismiss()
                 .then(() => {
                   self.viewCtrl.dismiss({

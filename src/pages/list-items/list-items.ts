@@ -62,7 +62,7 @@ export class ListItemsPage implements OnInit {
                     list: itemVals.list,
                     text: itemVals.text,
                     category: itemVals.category,
-                    user: itemUser,
+                    user: itemVals.user || itemUser,
                     dateCreated: itemVals.dateCreated,
                     qt: itemVals.qt,
                     state : 1

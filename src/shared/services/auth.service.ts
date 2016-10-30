@@ -116,13 +116,16 @@ export class AuthService {
             duration: 3000,
             position: 'middle'
         });
+        toast.present();
         return firebase.auth().signOut();  
     }
 
-    addUser(username: string, dateOfBirth: string, uid: string) {
+    addUser(username: string, dateOfBirth: string, email: string, uid: string) {
         this.usersRef.child(uid).update({
             username: username,
-            dateOfBirth: dateOfBirth
+            dateOfBirth: dateOfBirth,
+            email: email,
+            friends: null
         });
     }
 
