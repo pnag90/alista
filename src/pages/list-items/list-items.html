@@ -1,0 +1,37 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Items</ion-title>
+        <ion-buttons end>
+            <button ion-button (click)="showItemActions()">
+        <ion-icon name="options"></ion-icon>
+      </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <div *ngIf="!itemsLoaded">
+        <img src="assets/images/ring.gif" style="display:block; margin:auto" />
+    </div>
+    <ion-list *ngIf="itemsLoaded">
+        <ion-item-sliding #item *ngFor="let item of items" text-wrap >
+            <ion-item (click)="selectItem(item)">
+                <h2>{{item.text}}</h2>
+                <p>{{item.user.username}}</p>
+                <ion-note>{{item.state}}</ion-note>
+            </ion-item>
+
+            <ion-item-options side="right">
+                <button ion-button color="danger" (click)="removeItem(item)">
+                    <ion-icon name="trash"></ion-icon> 
+                    Delete
+                </button>
+            </ion-item-options>
+
+        </ion-item-sliding>
+    </ion-list>
+    
+    <ion-fab right bottom>
+        <button ion-fab color="primary"><ion-icon name="create" (click)="createItem()"></ion-icon></button>
+    </ion-fab>
+</ion-content>

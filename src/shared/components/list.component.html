@@ -1,0 +1,48 @@
+<ion-item text-wrap>
+    <!--<ion-card>-->
+
+        <button ion-item (click)="viewItems(list.key)">  
+            <h2>{{list.name}}</h2>
+            <p *ngIf="list.items>0">{{list.items}}</p>
+            <p style="font-color:#ccc;" *ngIf="list.items==0">{{list.items}}</p>
+        </button>    
+
+<!--
+        <ion-item>
+            <ion-avatar item-left>
+                <lista-user-avatar [user]="list.user"></lista-user-avatar>
+            </ion-avatar>
+            <h2>{{list.user.username}}</h2>
+            <p>{{list.dateCreated | date:'medium'}}</p>
+        </ion-item>
+
+        <<img src="img/advance-card-bttf.png">
+        <div class="list-card-title wordwrap">
+            {{list.name}}
+        </div>
+ 
+        <div class="list-card-question wordwrap left-border-primary">
+            {{list.createdAt}}
+        </div>   
+
+        <ion-row class="left-border-primary">
+            <ion-col>
+                <button color="primary" clear small (click)="viewItems(list.key)">
+                    <ion-icon name="quote"></ion-icon>
+                    <div>{{list.items}} Items</div>
+                </button>
+            </ion-col>
+            <ion-col>
+                <button color="primary" clear small (click)="viewComments(list.key)">
+                    <ion-icon name="quote"></ion-icon>
+                    <div>{{list.comments}} Comments</div>
+                </button>
+            </ion-col>
+            <ion-col center text-center>
+                <ion-note>
+                    {{list.shared}}
+                </ion-note>
+            </ion-col>
+        </ion-row>-->
+   <!-- </ion-card>-->
+</ion-item>

@@ -1,0 +1,44 @@
+login-page {
+
+  .app-logo {
+    padding: 20px 0;
+    min-height: 200px;
+    text-align: center;
+  }
+
+  .app-logo > * {
+    max-width: 150px;
+  }
+
+  ion-icon.padd-right {
+    padding-right: 4px;
+  }
+
+} 
+
+div.modal-wrapper{
+  login-page .app-logo {
+    visibility: hidden;
+    max-height: 0px;
+    min-height: 0px !important;
+    padding: 0 !important;
+
+  }
+
+  .platform-ios .fixed-div {
+      right: 0;
+      bottom: 0;
+      margin-bottom: 42px;
+  }
+
+  .platform-android .fixed-div {
+    right: 0;
+      bottom: 0;
+      margin-bottom: 56px;
+  }
+
+  .platform-windows .fixed-div {
+    right: 0;
+      bottom: 0;
+  }
+}

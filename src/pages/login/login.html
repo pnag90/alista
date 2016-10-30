@@ -1,0 +1,40 @@
+<ion-header *ngIf="false">
+    <ion-navbar hideBackButton>
+        <ion-title>Login</ion-title>
+    </ion-navbar>
+</ion-header>
+<ion-content padding>
+
+    <!--<img class="app-logo" src="assets/images/profile.png">-->
+    <div style="width:100%;" class="app-logo">
+        <h3> aLista </h3>
+    </div>    
+    
+    <form [formGroup]="loginFirebaseAccountForm" (ngSubmit)="onSubmit(loginFirebaseAccountForm.value)">
+        <ion-item [class.error]="!email.valid && email.touched">
+            <ion-label floating>Email address</ion-label>
+            <ion-input type="text" value="" [formControl]="email"></ion-input>
+        </ion-item>
+        <div *ngIf="email.hasError('required') && email.touched" class="error-box">* Email is required.</div>
+        <div *ngIf="email.hasError('pattern') && email.touched" class="error-box">* Enter a valid email address.</div>
+        <ion-item [class.error]="!password.valid && password.touched">
+            <ion-label floating>Password</ion-label>
+            <ion-input type="password" value="" [formControl]="password"></ion-input>
+        </ion-item>
+        <div *ngIf="password.hasError('required') && password.touched" class="error-box">* Password is required.</div>
+        <div *ngIf="password.hasError('minlength') && password.touched" class="error-box">* Minimum password length is 5.</div>
+        <br/><br/>
+        <button ion-button type="submit" class="custom-button" [disabled]="!loginFirebaseAccountForm.valid" block>Sign in</button>
+        <br/><br/>
+        <button ion-button block class="facebook-btn" (click)="loginUserWithFacebook()">
+            <ion-icon name="logo-facebook" class="padd-right"></ion-icon>  
+            Log In with Facebook
+        </button>
+
+        <br/>
+        <button ion-button clear (click)="register()" class="fixed-div">
+            <ion-icon name='flame' class="padd-right"></ion-icon>  
+            Register
+        </button>
+    </form>
+</ion-content>

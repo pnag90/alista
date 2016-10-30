@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-navbar no-border-bottom>
+    <!--
+    <button ion-button menuToggle *ngIf="isUserLoggedIn()">
+      <ion-icon name='menu'></ion-icon>
+    </button>
+    
+    <ion-segment [(ngModel)]="segment" (ionChange)="filterLists(segment)">
+      <ion-segment-button value="all">
+        All
+      </ion-segment-button>
+      <ion-segment-button value="favorites">
+        Favorites
+      </ion-segment-button>
+    </ion-segment>
+    
+
+    <ion-searchbar primary [(ngModel)]="queryText" (ionInput)="searchLists()" placeholder="Search for a list..">
+    </ion-searchbar>
+    -->
+    <ion-buttons left>
+      <button ion-button icon-left (click)="createList()" *ngIf="internetConnected">
+        <ion-icon name="add"></ion-icon>
+        Nova lista
+      </button>
+      <button ion-button icon-left (click)="notify('Working offline..')" *ngIf="!internetConnected">
+        <ion-icon name="warning"></ion-icon>
+        Nova lista
+      </button>
+    </ion-buttons>
+
+    <ion-buttons end>
+<!--
+      <button ion-button *ngIf="!internetConnected" (click)="notify('Working offline..')">
+        <ion-icon name="warning"></ion-icon>
+      </button>
+      <button ion-button (click)="createList()" *ngIf="internetConnected">
+        <ion-icon name="add"></ion-icon>
+      </button>
+       -->
+       <button ion-button (click)="options()" *ngIf="isUserLoggedIn()">
+        <ion-icon name="settings"></ion-icon>
+      </button>
+    </ion-buttons>
+   
+  </ion-navbar>
+
+<!--
+  <ion-toolbar no-border-top>
+    <ion-searchbar primary [(ngModel)]="queryText" (ionInput)="searchLists()" placeholder="Search for a list..">
+    </ion-searchbar>
+  </ion-toolbar>
+  -->
+</ion-header>
+
+<ion-content>
+
+  <ion-refresher (ionRefresh)="reloadLists($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading">
+    <img src="assets/images/ring.gif" style="display:block; margin:auto" />
+  </div>
+
+  <ion-list *ngIf="!loading">
+    <list-component *ngFor="let list of lists" [list]="list" (onViewItems)="viewItems($event)"></list-component>
+  </ion-list>
+
+  <ion-infinite-scroll (ionInfinite)="fetchNextLists($event)" threshold="10px" *ngIf="(start > 0) && (queryText.trim().length == 0) && internetConnected">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>
+
+<ion-footer no-border>
+  <ion-toolbar>
+    <ion-buttons left>
+      <button ion-button (click)="profile()">
+        <ion-icon name="contact"></ion-icon>
+      </button>  
+    </ion-buttons>
+
+    <ion-buttons right>
+      <button ion-button (click)="concact()">    
+        <ion-icon name="ios-mail-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,23 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>New Item</ion-title>
+        <ion-buttons start>
+            <button ion-button (click)="cancelNewItem()">
+        <ion-icon name="arrow-back"></ion-icon> Cancel
+      </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <form [formGroup]="createItemForm" (ngSubmit)="onSubmit(createItemForm.value)" *ngIf="loaded">
+        <ion-item [class.error]="!item.valid && item.touched">
+            <ion-label floating>Item</ion-label>
+            <ion-textarea [formControl]="item" rows="10"></ion-textarea>
+        </ion-item>
+        <div *ngIf="item.hasError('required') && item.touched" class="error-box">* Item is required.</div>
+        <div *ngIf="item.hasError('minlength') && item.touched" class="error-box">* Type at least 100 characters.</div>
+        <br/><br/>
+        <button ion-button type="submit" class="custom-button" [disabled]="!createItemForm.valid" block>Submit</button>
+    </form>
+</ion-content>
