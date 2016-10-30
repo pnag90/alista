@@ -46,6 +46,8 @@ export class ListItemsPage implements OnInit {
     createItem() {
         let self = this;
 
+        console.log("createItem");
+
         let modalPage = this.modalCtrl.create(ItemCreatePage, {
             listKey: this.listKey
         });
