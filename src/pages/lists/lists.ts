@@ -213,10 +213,10 @@ export class ListsPage implements OnInit {
         self.loading = false;
       });*/
       self.dataService.getUserListsRef().child(self.authService.getLoggedInUser().uid).on('child_added', function(snap){
-        console.log("UserListsRef -> child_added", snap.key);
         var listKey:string = snap.key;
         self.dataService.getListsRef().child(listKey).on('value', function(listSnap) {
-            self.lists.push(self.mappingsService.getList(listSnap.val(), listKey));
+            var newList:List = self.mappingsService.getList(listSnap.val(), listKey);
+            self.lists.unshift(newList);
         });
       });
       self.start -= (self.pageSize + 1);
