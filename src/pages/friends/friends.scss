@@ -1,20 +1,12 @@
-list-page{
-  .lists-list-main{
+friemds-page{
+  .friends-list-main{
 
     ion-item.item{
       background-color: rgba(255,255,255,0.82);
       > div.item-inner {
         background: transparent !important;
         border: none;
-       /* ion-label{
-          margin: 6px 6px 6px 0;
-        }*/
-        button.item {
-          background: transparent !important;
-          div.item-inner {
-             border: none;
-          }
-        }
+       
       }
     }
 

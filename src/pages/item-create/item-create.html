@@ -16,13 +16,15 @@
             <ion-input [formControl]="item" ></ion-input>
         </ion-item>
         <div *ngIf="item.hasError('required') && item.touched" class="error-box">* Item is required.</div>
-        <div *ngIf="item.hasError('minlength') && item.touched" class="error-box">* Type at least 100 characters.</div>
+        <div *ngIf="item.hasError('minlength') && item.touched" class="error-box">* Type at least 3 characters.</div>
+        <div *ngIf="item.hasError('maxlength') && item.touched" class="error-box">* Maximun name length is 16.</div>
         <br/>
         <ion-item [class.error]="!quantity.valid && quantity.touched">
             <ion-label floating>Qt</ion-label>
             <ion-input [formControl]="quantity" ></ion-input>
         </ion-item>
         <div *ngIf="quantity.hasError('minlength') && quantity.touched" class="error-box">* Type at least 1 characters.</div>
+        <div *ngIf="quantity.hasError('maxlength') && quantity.touched" class="error-box">* Maximun name length is 12.</div>
         <br/><br/>
         <button ion-button type="submit" class="custom-button" [disabled]="!createItemForm.valid" block>Submit</button>
     </form>

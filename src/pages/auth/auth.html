@@ -1,0 +1,27 @@
+<ion-content padding style="background: url(assets/images/bg1.jpg) center; background-size: cover;">
+
+    <div center>
+        <div class="app-icon"></div>
+
+        <ion-segment [(ngModel)]="homeScreen" color="primary">
+            <ion-segment-button value="login">
+                Login
+            </ion-segment-button>
+            <ion-segment-button value="signup">
+                signUp
+            </ion-segment-button>
+        </ion-segment>
+    </div>
+
+    <!--<div [ngSwitch]="homeScreen" >
+        <ion-list *ngSwitchWhen="'login'">
+            loggg
+        </ion-list>
+
+        <ion-list *ngSwitchWhen="'signup'">
+            signup
+        </ion-list>
+    </div>-->
+
+
+</ion-content>

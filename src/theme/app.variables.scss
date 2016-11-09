@@ -1,11 +1,11 @@
 
-$toolbar-background : #0087be;
+$toolbar-background : #4f8ff7; // #0087be;
 //$list-background-color : white;
 $card-ios-background-color: #f4f4f4;
 $card-md-background-color: #f4f4f4;
 $card-wp-background-color: #f4f4f4;
 scroll-content { background-color: whitesmoke;}
-ion-list .item .item-inner {
+/*ion-list .item .item-inner {
     // pedro background: whitesmoke;
 }
 .item {
@@ -15,7 +15,12 @@ ion-list .item .item-inner {
 ion-card {
     background: white !important;
 }
-
+*/
 .left-border-primary {
     border-left: 4px solid #0087be;
+}
+
+/* pnag */
+.item, .item-md  {
+    background-color: transparent !important;
 }

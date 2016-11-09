@@ -43,6 +43,16 @@ export interface UserCredentials {
     password: string;
 }
 
+export interface UserProfile {
+    uid: string;
+    username: string;
+    email: string;
+    dateOfBirth: string;
+    image?: boolean;
+    photoURL?: string;
+    friendship?: string;
+}
+
 export interface Predicate<T> {
     (item: T): boolean;
 }

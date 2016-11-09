@@ -16,7 +16,8 @@
             <ion-input type="text" value="" [formControl]="name"></ion-input>
         </ion-item>
         <div *ngIf="name.hasError('required') && name.touched" class="error-box">* Name is required.</div>
-        <div *ngIf="name.hasError('minlength') && name.touched" class="error-box">* Minimum name length is 5.</div>
+        <div *ngIf="name.hasError('minlength') && name.touched" class="error-box">* Minimum name length is 4.</div>
+        <div *ngIf="name.hasError('maxlength') && name.touched" class="error-box">* Maximun name length is 16.</div>
         <!--<ion-item [class.error]="!question.valid && question.touched">
             <ion-label floating>Question</ion-label>
             <ion-textarea [formControl]="question" rows="6"></ion-textarea>

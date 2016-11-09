@@ -1,6 +1,6 @@
 <ion-tabs #listTabs [selectedIndex]="0" (click)="clicked()">
-    <ion-tab tabIcon="chatboxes" #content [root]="listsPage" tabBadge="{{newLists}}" tabBadgeStyle="danger"></ion-tab>
-    <ion-tab tabIcon="contact" #content [root]="profilePage" show="true" swipeBackEnabled="false"></ion-tab>
-    <ion-tab tabIcon="person" #content [root]="loginPage" show="false"></ion-tab>
-    <ion-tab tabIcon="information-circle" #content [root]="aboutPage"></ion-tab>
+    <ion-tab tabIcon="list" #content [root]="listsPage" tabBadge="{{newLists}}" tabBadgeStyle="danger"></ion-tab>
+    <ion-tab tabIcon="people" #content [root]="friendsPage" swipeBackEnabled="false"></ion-tab> 
+    <!--<ion-tab tabIcon="information-circle" #content [root]="aboutPage"></ion-tab>-->
+    <ion-tab tabIcon="person" #content [root]="profilePage" swipeBackEnabled="false"></ion-tab>
 </ion-tabs>

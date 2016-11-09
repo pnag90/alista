@@ -74,20 +74,20 @@ export class DataService {
 
     private InitData() {
         let self = this;
-        // Set statistics/threads = 1 for the first time only
-        self.getStatisticsRef().child('lists').transaction(function (currentRank) {
+        // Set statistics/lists = 1 for the first time only
+        self.getStatisticsListsRef().transaction(function (currentRank) {
             if (currentRank === null) {
-                return 1;
+                return 0;
             }
         }, function (error, committed, snapshot) {
             if (error) {
                 console.log('Transaction failed abnormally!', error);
             } else if (!committed) {
-                console.log('We aborted the transaction because there is already one list.');
+                //console.log('We aborted the transaction because there is already one list.');
             } else {
                 console.log('Lists number initialized!');
 
-                let list: List = {
+                /*let list: List = {
                     key: null,
                     name: 'Nova lista',
                     dateCreated: (new Date()).toString(),
@@ -100,11 +100,11 @@ export class DataService {
                 let firstListRef = self.listsRef.push();
                 firstListRef.setWithPriority(list, 1).then(function (dataShapshot) {
                     console.log('Congratulations! You have created the first list!');
-                });
+                });*/
             }
             console.log('commited', snapshot.val());
         }, false);
-                
+
     }
 
     getDatabaseRef() {
@@ -128,7 +128,11 @@ export class DataService {
     }
 
     getTotalLists() {
-        return this.statisticsRef.child('lists').once('value');
+        return this.statisticsRef.child('lists').child('total').once('value');
+    }
+
+    getTotalUsers(){
+        return this.statisticsRef.child('users').once('value');
     }
 
     getListsRef() {
@@ -145,6 +149,10 @@ export class DataService {
 
     getStatisticsRef() {
         return this.statisticsRef;
+    }
+
+    getStatisticsListsRef() {
+        return this.statisticsRef.child('lists').child('total');
     }
 
     getUsersRef() {
@@ -165,6 +173,10 @@ export class DataService {
 
     getListCommentsRef(listKey: string) {
         return this.commentsRef.orderByChild('list').equalTo(listKey);
+    }
+
+    loadUsers() {
+        return this.usersRef.once('value');
     }
 
     loadLists() {
@@ -204,10 +216,36 @@ export class DataService {
     }
 
     submitList(list: List, priority: number) {
-        var newListRef = this.listsRef.push();
-        this.statisticsRef.child('lists').set(priority);
+        var self = this;
+        var newListRef = self.listsRef.push();
         console.log(priority);
-        return newListRef.setWithPriority(list, priority);
+        return newListRef.setWithPriority(list, priority).then(
+            function(){
+                self.getStatisticsListsRef().set(priority);
+                self.shareList(newListRef.key);
+            },
+            function(err){
+                console.error(err);
+            });  
+    }
+
+    removeList(listKey: string) {
+        var self = this;
+        console.log("deleting list: "+listKey);
+        var userKey: string = firebase.auth().currentUser.uid;
+        var updates = {};
+        updates['/lists/' + listKey] = null;
+        updates['/user-lists/' + userKey + '/'+ listKey] = null;
+        return self.databaseRef.ref().update(updates).then(
+            function(){
+                self.getStatisticsListsRef().once('value').then((snapshot) => {
+                    let numberOfLists = snapshot == null ? 1 : snapshot.val() || 1;
+                    self.getStatisticsListsRef().set(numberOfLists - 1);
+                });
+            },
+            function(err){
+                console.error(err);
+            });  
     }
 
     shareList(listKey: string) {
@@ -230,18 +268,30 @@ export class DataService {
         });
     }
 
+    getFriends(user: string) {
+        return this.usersRef.child(user).child('friends').once('value');
+    }
+
     addFriend(user1: string, user2: string){
         var updates = {};
-        updates['/users/' + user1 + '/friends/' + user2] = true;
-        updates['/users/' + user2 + '/friends/' + user1] = true;
-        return firebase.database().ref().update(updates);
+        updates['/users/' + user1 + '/friends/' + user2] = {state: "send"};
+        updates['/users/' + user2 + '/friends/' + user1] = {state: "pending"};
+        return this.databaseRef.ref().update(updates);
+    }
+
+    acceptFriend(user1: string, user2: string){
+        var updates = {};
+        var dta : string = (new Date()).toString();
+        updates['/users/' + user1 + '/friends/' + user2] = {state: "friends", startDate: dta};
+        updates['/users/' + user2 + '/friends/' + user1] = {state: "friends", startDate: dta};
+        return this.databaseRef.ref().update(updates);
     }
 
     removeFriend(user1: string, user2: string){
         var updates = {};
         updates['/users/' + user1 + '/friends/' + user2] = null;
         updates['/users/' + user2 + '/friends/' + user1] = null;
-        return firebase.database().ref().update(updates);
+        return this.databaseRef.ref().update(updates);
     }
 
 
@@ -250,20 +300,19 @@ export class DataService {
     }
 
     setListItem(listKey: string, item: ListItem) {
-        // let commentRef = this.commentsRef.push();
-        // let commentkey: string = commentRef.key;
-        this.itemsRef.child(item.key).set(item);
-
-        return this.itemsRef.child(listKey + '/items').once('value')
+        return this.listsRef.child(listKey).child('items').once('value')
             .then((snapshot) => {
-                let numberOfItems = snapshot == null ? 0 : snapshot.val();
-                this.listsRef.child(listKey + '/items').set(numberOfItems + 1);
+                let numberOfItems = snapshot == null ? 0 : snapshot.val() || 0;
+                let priority = numberOfItems + 1;
+                
+                this.itemsRef.child(item.key).setWithPriority(item, priority);
+                this.listsRef.child(listKey).child('items').set(priority);
             });
     }
 
     updateListItem(itemKey: string, text:string, qt:number): any {
-        this.itemsRef.child(itemKey+'text').set(text);
-        return this.itemsRef.child(itemKey+'qt').set(qt);
+        this.itemsRef.child(itemKey).child('text').set(text);
+        return this.itemsRef.child(itemKey).child('qt').set(qt);
     }
 
     updateListItemState(itemKey: string, state: number): any {
@@ -274,9 +323,9 @@ export class DataService {
     deleteListItem(listKey: string, item: ListItem) {
         this.itemsRef.child(item.key).set(null);
 
-        return this.itemsRef.child(listKey + '/items').once('value')
+        return this.listsRef.child(listKey + '/items').once('value')
             .then((snapshot) => {
-                let numberOfItems = snapshot == null ? 0 : snapshot.val();
+                let numberOfItems = snapshot == null ? 1 : snapshot.val() || 1;
                 this.listsRef.child(listKey + '/items').set(numberOfItems - 1);
             });
     }        
@@ -314,6 +363,10 @@ export class DataService {
         return this.listsRef.orderByChild('user/uid').equalTo(userUid).once('value');
     }
 
+    getTotalUserLists(userUid: string){
+        return this.usersRef.child(userUid).child('lists').once('value');
+    }
+
     getOnlyUserLists(userUid: string) {
         return this.listsRef.orderByChild('user/uid').equalTo(userUid).once('value');
     }
@@ -321,7 +374,7 @@ export class DataService {
     getUserComments(userUid: string) {
         return this.commentsRef.orderByChild('user/uid').equalTo(userUid).once('value');
     }
-
+    
     getUserFriends(userUid: string) {
         return this.usersRef.child(userUid + '/friends').once('value');
     }

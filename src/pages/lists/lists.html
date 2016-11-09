@@ -29,19 +29,19 @@
       </button>
     </ion-buttons>
 
-    <ion-buttons end>
-<!--
+   <!-- <ion-buttons end>
+
       <button ion-button *ngIf="!internetConnected" (click)="notify('Working offline..')">
         <ion-icon name="warning"></ion-icon>
       </button>
       <button ion-button (click)="createList()" *ngIf="internetConnected">
         <ion-icon name="add"></ion-icon>
       </button>
-       -->
+      
        <button ion-button (click)="options()" *ngIf="isUserLoggedIn()">
         <ion-icon name="settings"></ion-icon>
       </button>
-    </ion-buttons>
+    </ion-buttons> -->
    
   </ion-navbar>
 
@@ -53,7 +53,7 @@
   -->
 </ion-header>
 
-<ion-content>
+<ion-content style="background: url(assets/images/bg2.jpg) center; background-size: cover;">
 
   <ion-refresher (ionRefresh)="reloadLists($event)">
     <ion-refresher-content></ion-refresher-content>
@@ -63,21 +63,26 @@
     <img src="assets/images/ring.gif" style="display:block; margin:auto" />
   </div>
 
-  <ion-list *ngIf="!loading">
+  <ion-list *ngIf="!loading" class="lists-list-main">
     <list-component *ngFor="let list of lists" [list]="list" (onViewItems)="viewItems($event)"></list-component>
   </ion-list>
-
-  <ion-infinite-scroll (ionInfinite)="fetchNextLists($event)" threshold="10px" *ngIf="(start > 0) && (queryText.trim().length == 0) && internetConnected">
+<!--
+  <ion-infinite-scroll (ionInfinite)="fetchNextLists($event)" threshold="10px" *ngIf="(start > 0) && internetConnected">
     <ion-infinite-scroll-content></ion-infinite-scroll-content>
-  </ion-infinite-scroll>
+  </ion-infinite-scroll>-->
 </ion-content>
 
+<!--
 <ion-footer no-border>
   <ion-toolbar>
     <ion-buttons left>
       <button ion-button (click)="profile()">
         <ion-icon name="contact"></ion-icon>
       </button>  
+
+      <button ion-button (click)="friends()">
+        <ion-icon name="man"></ion-icon>
+      </button>
     </ion-buttons>
 
     <ion-buttons right>
@@ -88,3 +93,4 @@
 
   </ion-toolbar>
 </ion-footer>
+-->

@@ -73,9 +73,17 @@ export class SignupPage implements OnInit {
 
             this.authService.registerUser(newUser)
                 .then(function (result) {
-                    self.authService.addUser(signupForm.username, signupForm.dateOfBirth, signupForm.email, self.authService.getLoggedInUser().uid);
-                    loader.dismiss()
-                        .then(() => {
+                    // user profile creation
+                    self.authService.creatUserProfile({
+                        uid: self.authService.getLoggedInUser().uid,
+                        username: signupForm.username,
+                        email: signupForm.email,
+                        dateOfBirth: signupForm.dateOfBirth,
+                        image: false,
+                        photoURL: null
+                    }).then(function(res){
+
+                        loader.dismiss().then(() => {
                             self.viewCtrl.dismiss({
                                 user: newUser
                             }).then(() => {
@@ -88,6 +96,9 @@ export class SignupPage implements OnInit {
                                 self.CreateAndUploadDefaultImage();
                             });
                         });
+
+                    });
+
                 }).catch(function (error) {
                     // Handle Errors here.
                     console.error(error);

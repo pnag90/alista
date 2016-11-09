@@ -6,10 +6,11 @@ import { Subscription } from '../../node_modules/rxjs/Subscription';
 import { AuthService } from '../shared/services/auth.service';
 import { DataService } from '../shared/services/data.service';
 import { SqliteService } from '../shared/services/sqlite.service';
-//import { TabsPage} from '../pages/tabs/tabs';
+import { TabsPage} from '../pages/tabs/tabs';
 import { LoginPage } from '../pages/login/login';
-import { ListsPage } from '../pages/lists/lists';
+//import { ListsPage } from '../pages/lists/lists';
 import { SignupPage } from '../pages/signup/signup';
+import { AuthPage } from '../pages/auth/auth';
 
 //import * as firebase from 'firebase';
 
@@ -22,6 +23,7 @@ export class AListaApp implements OnInit {
   @ViewChild('content') nav: any;
 
   public rootPage: any;
+  public homePage: AuthPage;
   public loginPage: LoginPage;
 
   connectSubscription: Subscription;
@@ -35,7 +37,7 @@ export class AListaApp implements OnInit {
     public modalCtrl: ModalController) {
     
     var self = this;
-    this.rootPage = ListsPage; //TabsPage; ListsPage
+   //this.rootPage = TabsPage; // ListsPage; //TabsPage; ListsPage AuthPage
 
 /*
     const firebaseConfig = {
@@ -109,10 +111,12 @@ export class AListaApp implements OnInit {
     this.authService.onAuthStateChanged(function (user) {
       if (user === null) {
         self.menu.close();
-        //self.nav.setRoot(LoginPage);
+        self.nav.setRoot(LoginPage);
 
         //let loginodal = self.modalCtrl.create(LoginPage);
         //loginodal.present();
+      }else{
+        self.nav.setRoot(TabsPage);
       }
     });
   }
@@ -131,7 +135,15 @@ export class AListaApp implements OnInit {
   signout() {
     var self = this;
     self.menu.close();
-    self.authService.signOut();
+    self.authService.signOut().then(function(){
+        self.nav.setRoot(LoginPage);
+        let toast = this.toastCtrl.create({
+            message: 'Logged out successfully',
+            duration: 3000,
+            position: 'middle'
+        });
+        toast.present();
+    });
   }
 
   isUserLoggedIn(): boolean {

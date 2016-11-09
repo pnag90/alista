@@ -4,7 +4,7 @@
             <ion-icon name='menu'></ion-icon>
         </button>-->
         <ion-title>Profile</ion-title>
-        <ion-buttons end>
+        <ion-buttons end *ngIf="mySelf">
             <button ion-button (click)="openImageOptions()">
                 <ion-icon name="camera"></ion-icon>
             </button>
@@ -25,14 +25,13 @@
     </div>
 
     <ion-list no-border *ngIf="userDataLoaded">
-
         <ion-list-header>
             Basic Info
         </ion-list-header>
         <ion-item>
             <ion-thumbnail item-left>
                 <!--<img src="{{userProfile.image}}">-->
-                <lista-user-avatar [user]="user" [photoURL]="userPhotoUrl" *ngIf="userDataLoaded"></lista-user-avatar>
+                <lista-user-avatar [user]="user" [profile]="userProfile" *ngIf="userDataLoaded"></lista-user-avatar>
             </ion-thumbnail>
             <h2>{{userProfile.username}}</h2>
             <p>{{firebaseAccount.email}}</p>
@@ -46,12 +45,12 @@
             </ion-note>
         </ion-item>
 
-        <ion-item>
+       <!-- <ion-item>
             <ion-icon name='cloud-upload' item-left></ion-icon>
             <ion-note item-right>
                 {{firebaseAccount.U}}
             </ion-note>
-        </ion-item>
+        </ion-item>-->
 
     </ion-list>
 
@@ -69,6 +68,12 @@
         </ion-item>
 
         <ion-item>
+            # Friends
+            <ion-icon name='quote' item-left></ion-icon>
+            <ion-badge item-right>{{userStatistics.totalFriends}}</ion-badge>
+        </ion-item>
+
+       <!-- <ion-item>
             # Comments
             <ion-icon name='quote' item-left></ion-icon>
             <ion-badge item-right>{{userStatistics.totalComments}}</ion-badge>
@@ -77,7 +82,7 @@
             # Favorites
             <ion-icon name='heart' item-left></ion-icon>
             <ion-badge item-right>{{userProfile.totalFavorites}}</ion-badge>
-        </ion-item>
+        </ion-item>-->
 
     </ion-list>
 </ion-content>

@@ -1,5 +1,33 @@
 login-page {
+  form {
+    .item, .item-md  {
+      background-color: transparent !important;
 
+      ion-label {
+        color: rgba(0, 0, 0, 0.9) !important;
+      }
+
+      ion-input {
+        background-color: rgba(0,0,0,0.42);
+        color: white;
+        padding-left: 4px;
+        padding-right: 4px;
+      }
+    }
+
+    button.custom-button{
+      background-color:rgba(245, 61, 61, 0.8);
+    }
+    button.facebook-btn{
+      background-color:rgba(0, 135, 190, 0.8);
+    }
+    button.button-outline{
+      border-color:rgba(244, 244, 244, 0.4);
+    }
+  }
+
+
+  
   .app-logo {
     padding: 20px 0;
     min-height: 200px;
@@ -10,19 +38,40 @@ login-page {
     max-width: 150px;
   }
 
+  /**** D:\Work\personal\alista\src\assets\images  */
+  .app-icon {
+    background: rgba(0, 0, 0, 0) url("../../assets/images/app-icon.png") repeat scroll center center / cover ;
+    border-radius: 0%;
+    height: 120px;
+    margin: 0 auto;
+    width: 120px;
+  }
+
   ion-icon.padd-right {
     padding-right: 4px;
   }
 
+  @media (max-height : 600px) {
+    .app-logo {
+      min-height: 60px;
+    }
+
+    .app-icon {
+      height: 60px;
+      width: 60px;
+    }
+  }
 } 
+
+
 
 div.modal-wrapper{
   login-page .app-logo {
-    visibility: hidden;
-    max-height: 0px;
-    min-height: 0px !important;
-    padding: 0 !important;
-
+    //visibility: hidden;
+    //max-height: 0px;
+    //min-height: 0px !important;
+    min-height: 50px !important;
+    //padding: 0 !important;
   }
 
   .platform-ios .fixed-div {
@@ -33,12 +82,12 @@ div.modal-wrapper{
 
   .platform-android .fixed-div {
     right: 0;
-      bottom: 0;
-      margin-bottom: 56px;
+    bottom: 0;
+    margin-bottom: 56px;
   }
 
   .platform-windows .fixed-div {
     right: 0;
-      bottom: 0;
+    bottom: 0;
   }
 }

@@ -1,10 +1,9 @@
 <ion-item text-wrap>
     <!--<ion-card>-->
 
-        <button ion-item (click)="viewItems(list.key)">  
+        <button ion-item (click)="viewItems(list.key,list.items)">  
             <h2>{{list.name}}</h2>
-            <p *ngIf="list.items>0">{{list.items}}</p>
-            <p style="font-color:#ccc;" *ngIf="list.items==0">{{list.items}}</p>
+            <p style="font-color: rgba(0,0,0,0.7);" *ngIf="list.items>0">{{list.items}}</p>
         </button>    
 
 <!--

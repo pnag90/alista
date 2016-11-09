@@ -27,7 +27,7 @@ export class ListCreatePage implements OnInit {
   ngOnInit() {
     console.log('in list create..');
     this.createListForm = this.fb.group({
-      'name': ['', Validators.compose([Validators.required, Validators.minLength(5)])] /*,
+      'name': ['', Validators.compose([Validators.required, Validators.minLength(4), Validators.maxLength(16)])] /*,
       'question': ['', Validators.compose([Validators.required, Validators.minLength(10)])],
       'category': ['', Validators.compose([Validators.required, Validators.minLength(1)])]*/
     });
@@ -53,11 +53,11 @@ export class ListCreatePage implements OnInit {
       loader.present();
 
       let uid = self.authService.getLoggedInUser().uid;
-      self.dataService.getUsername(uid).then(function (snapshot) {
-        let username = snapshot.val();
+      self.dataService.getUsername(uid).then(function (userSnap) {
+        let username = userSnap.val();
 
-        self.dataService.getTotalLists().then(function (snapshot) {
-          let currentNumber = snapshot.val();
+        self.dataService.getTotalLists().then(function (totalSnap) {
+          let currentNumber = totalSnap.val();
           let newPriority: number = currentNumber === null ? 1 : (currentNumber + 1);
 
           let newList: List = {
@@ -65,22 +65,21 @@ export class ListCreatePage implements OnInit {
             name: list.name,
             user: { uid: uid, username: username },
             dateCreated: new Date().toString(),
-            comments: null,
-            items: null,
-            shares: null
+            comments: 0,
+            items: 0,
+            shares: 0
           };
 
           self.dataService.submitList(newList, newPriority)
-            .then(function (snapshot) {
-              console.log("created");
-            
-              loader.dismiss()
-                .then(() => {
-                  self.viewCtrl.dismiss({
-                    list: newList,
-                    priority: newPriority
-                  });
+            .then(function () {
+
+              loader.dismiss().then(() => {
+                self.viewCtrl.dismiss({
+                  list: newList,
+                  priority: newPriority
                 });
+              });
+
             }, function (error) {
               // The Promise was rejected.
               console.error(error);

@@ -15,6 +15,7 @@ export class ItemCreatePage implements OnInit {
   item: AbstractControl;
   quantity: AbstractControl;
   listKey: string;
+  listLen: number;
   loaded: boolean = false;
 
   constructor(public nav: NavController,
@@ -23,16 +24,15 @@ export class ItemCreatePage implements OnInit {
     public viewCtrl: ViewController,
     public fb: FormBuilder,
     public authService: AuthService,
-    public dataService: DataService) {
-
-  }
+    public dataService: DataService) {}
 
   ngOnInit() {
     this.listKey = this.navParams.get('listKey');
+    this.listLen = this.navParams.get('listLen');
 
     this.createItemForm = this.fb.group({
-      'item': ['', Validators.compose([Validators.required, Validators.minLength(4)])],
-      'quantity': ['', Validators.compose([Validators.minLength(1)])]
+      'item': ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(16)])],
+      'quantity': ['', Validators.compose([Validators.minLength(1), Validators.maxLength(12)])]
     });
 
     this.item = this.createItemForm.controls['item'];

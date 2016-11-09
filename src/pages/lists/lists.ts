@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavController, ModalController, ToastController, Content, ActionSheetController, Events } from 'ionic-angular';
-import { Observable } from 'rxjs/Observable';  
 
 import { List } from '../../shared/interfaces';
 import { ListCreatePage } from '../list-create/list-create';
@@ -15,19 +14,21 @@ import { SqliteService } from '../../shared/services/sqlite.service';
 import { ProfilePage } from '../profile/profile';
 import { LoginPage } from '../login/login';
 import { SignupPage } from '../signup/signup';
+import { FriendsPage } from '../friends/friends';
 
 @Component({
+  selector: 'list-page',
   templateUrl: 'lists.html'
 })
 export class ListsPage implements OnInit {
   @ViewChild(Content) content: Content;
-  segment: string = 'all';
-  selectedSegment: string = this.segment;
-  queryText: string = '';
+
   public start: number;
-  public pageSize: number = 3;
+  public pageSize: number = 6;
   public loading: boolean = true;
   public internetConnected: boolean = true;
+  public connected: boolean = false;
+  public myUser: any;
 
   public lists: Array<List> = [];
   public newLists: Array<List> = [];
@@ -36,6 +37,7 @@ export class ListsPage implements OnInit {
   public profilePage: any;
   public loginPage: any;
   public signUpPage: any;
+  public friendsPage: any;
 
   public firebaseConnectionAttempts: number = 0;
 
@@ -52,14 +54,13 @@ export class ListsPage implements OnInit {
         this.profilePage = ProfilePage;
         this.loginPage = LoginPage;
         this.signUpPage = SignupPage;
+        this.friendsPage = FriendsPage;
     }
 
   ngOnInit() {
-    var self = this;
-    self.segment = 'all';
+    var self = this; 
     self.events.subscribe('network:connected', self.networkConnected);
-    self.events.subscribe('lists:add', self.addNewLists);
-
+    //self.events.subscribe('lists:add', self.addNewLists);
     self.checkFirebase();
   }
 
@@ -67,25 +68,23 @@ export class ListsPage implements OnInit {
     let self = this;
     if (!self.dataService.isFirebaseConnected()) {
       setTimeout(function () {
-        console.log('Retry : ' + self.firebaseConnectionAttempts);
-        self.firebaseConnectionAttempts++;
-        if (self.firebaseConnectionAttempts < 5) {
-          self.checkFirebase();
-        } else {
-          self.internetConnected = false;
-          self.dataService.goOffline();
-          self.loadSqliteLists();
+        if(!self.connected){  // check after timeout
+          console.log('Retry : ' + self.firebaseConnectionAttempts);
+          self.firebaseConnectionAttempts++;
+          if (self.firebaseConnectionAttempts < 5) {
+            self.checkFirebase();
+          } else {
+            self.internetConnected = false;
+            self.dataService.goOffline();
+            self.loadSqliteLists();
+          }
         }
-      }, 1000);
-    } else {
+      }, 1200);
+    } else if(!self.connected){
+      self.connected = true;
+      self.myUser = self.authService.getLoggedInUser();
       console.log('Firebase connection found (lists.ts) - attempt: ' + self.firebaseConnectionAttempts);
-      self.dataService.getStatisticsRef().on('child_changed', self.onListAdded);
-      if (self.authService.getLoggedInUser() === null) {
-        // 
-        self.loadLists(true);
-      } else {
-        self.loadLists(true);
-      }
+      self.loadLists();
     }
   }
 
@@ -130,7 +129,7 @@ export class ListsPage implements OnInit {
 
     if (self.internetConnected) {
       self.lists = [];
-      self.loadLists(true);
+      self.loadLists();
     } else {
       self.notify('Connection lost. Working offline..');
       // save current lists..
@@ -142,127 +141,93 @@ export class ListsPage implements OnInit {
     }
   }
 
-  // Notice function declarion to keep the right this reference
-  public onListAdded = (childSnapshot, prevChildKey) => {
-    let priority = childSnapshot.val(); // priority..
-    var self = this;
-    self.events.publish('list:created');
-    // fetch new list..
-    self.dataService.getListsRef().orderByPriority().equalTo(priority).once('value').then(function (dataSnapshot) {
-      let key = Object.keys(dataSnapshot.val())[0];
-      let newList: List = self.mappingsService.getList(dataSnapshot.val()[key], key);
-      console.log("lets share:"+key);
-      self.dataService.shareList(key);
-      //self.newLists.push(newList);
-    });
-  }
-
-  public addNewLists = () => {
-    var self = this;
-    self.newLists.forEach(function (list: List) {
-      self.lists.unshift(list);
-    });
-
-    self.newLists = [];
-    self.scrollToTop();
-    self.events.publish('lists:viewed');
-  }
-
-  loadLists(fromStart: boolean) {
+  loadLists() {
     var self = this;
 
-    if (fromStart) {
-      self.loading = true;
+    if ( !self.isUserLoggedIn() ){
+      self.loading = false;
+    }else{
       self.lists = [];
       self.newLists = [];
-
-      if (self.segment === 'all') {
-        this.dataService.getTotalLists().then(function (snapshot) {
-          self.start = snapshot.val();
-          self.getLists();
-        });
-      } else {
-        self.start = 0;
-        self.favoriteListKeys = [];
-        self.dataService.getFavoriteLists(self.authService.getLoggedInUser().uid).then(function (dataSnapshot) {
-          let favoriteLists = dataSnapshot.val();
-          self.itemsService.getKeys(favoriteLists).forEach(function (listKey) {
-            self.start++;
-            self.favoriteListKeys.push(listKey);
-          });
-          self.getLists();
-        });
-      }
-    } else {
-      self.getLists();
+      self.dataService.getTotalUserLists(self.myUser.uid).then(function (snapshot) {
+        var total = snapshot.val() || 0;
+        self.getLists(total==0);
+      });
+      /*this.dataService.getTotalUserLists(self.authService.getLoggedInUser().uid).then(function (snapshot) {
+        self.start = snapshot.val() || self.pageSize;
+        self.getLists();
+      });*/
     }
   }
 
-  getLists() {
+  getLists(userHasNoLists:boolean) {
     var self = this;
-    let startFrom: number = self.start - self.pageSize;
-    if (startFrom < 0)
-      startFrom = 0;
-    if (self.segment === 'all') {
-      /*this.dataService.getListsRef().orderByPriority().startAt(startFrom).endAt(self.start).once('value', function (snapshot) {
-        self.itemsService.reversedItems<List>(self.mappingsService.getLists(snapshot)).forEach(function (list) {
-          self.lists.push(list);
-        });
-        self.start -= (self.pageSize + 1);
-        self.events.publish('lists:viewed');
-        self.loading = false;
-      });*/
-      self.dataService.getUserListsRef().child(self.authService.getLoggedInUser().uid).on('child_added', function(snap){
-        var listKey:string = snap.key;
-        self.dataService.getListsRef().child(listKey).on('value', function(listSnap) {
-            var newList:List = self.mappingsService.getList(listSnap.val(), listKey);
-            self.lists.unshift(newList);
-        });
+    /*this.dataService.getListsRef().orderByPriority().startAt(startFrom).endAt(self.start).once('value', function (snapshot) {
+      self.itemsService.reversedItems<List>(self.mappingsService.getLists(snapshot)).forEach(function (list) {
+        self.lists.push(list);
       });
       self.start -= (self.pageSize + 1);
       self.events.publish('lists:viewed');
       self.loading = false;
-    } else {
-      self.favoriteListKeys.forEach(key => {
-        this.dataService.getListsRef().child(key).once('value')
-          .then(function (dataSnapshot) {
-            self.lists.unshift(self.mappingsService.getList(dataSnapshot.val(), key));
-          });
+    });*/
+    console.debug("load_lists:init "+ (new Date()).toString());
+    if(userHasNoLists){
+      self.loading = false;
+      console.debug("load_lists:userHasNoLists - "+ (new Date()).toString());
+    }
+
+    self.dataService.getUserListsRef().child(self.myUser.uid).on('child_added', function(snap){  
+      console.log("lists : child_added : "+snap.key);
+      var listKey:string = snap.key;
+      self.loading = true;
+      self.dataService.getListsRef().child(listKey).once('value', function(listSnap) {
+         console.log("lists : child_added : getListsRef");
+          var newList:List = self.mappingsService.getList(listSnap, listKey);
+          self.lists.unshift(newList);
+          self.loading = false;
+          console.debug("load_lists:stop - "+ (new Date()).toString());
+      });
+    });
+
+    self.dataService.getUserListsRef().child(self.myUser.uid).on('child_removed', function(snap){ 
+      console.log("lists : child_removed : "+snap.key);
+      var listKey:string = snap.key;
+      for(var i:number=0; i<self.lists.length; i++){
+          if(self.lists[i].key == listKey){
+              self.itemsService.removeItemFromArray(self.lists, self.lists[i]);
+              break;
+          }
+      }
+    });
+
+    self.dataService.getListsRef().on('child_changed', function(changeSnap) {
+      console.log("lists : child_changed : "+changeSnap.key);
+      console.log(changeSnap.val());
+      if(changeSnap.key && self.lists.length>0){
+        var changedList:List = self.mappingsService.getList(changeSnap, changeSnap.key);
+        for(var i:number=0; i<self.lists.length; i++){
+          if(self.lists[i].key == changedList.key){
+              self.lists[i] = changedList;
+              break;
+          }
+        }
+      }
+    });   
+
+    //self.start -= (self.pageSize + 1);
+    
+      
+    self.events.publish('lists:viewed');
+/*
+    self.dataService.getUserListsRef().child(self.myUser.uid).once('value', function(snapshot){  
+      self.itemsService.reversedItems<List>(self.mappingsService.getLists(snapshot)).forEach(function (list) {
+        self.lists.push(list);
       });
       self.events.publish('lists:viewed');
       self.loading = false;
-    }
-
-  }
-
-  filterLists(segment) {
-    if (this.selectedSegment !== this.segment) {
-      this.selectedSegment = this.segment;
-      if (this.selectedSegment === 'favorites')
-        this.queryText = '';
-      if (this.internetConnected)
-        // Initialize
-        this.loadLists(true);
-    } else {
-      this.scrollToTop();
-    }
-  }
-
-  searchLists() {
-    var self = this;
-    if (self.queryText.trim().length !== 0) {
-      self.segment = 'all';
-      // empty current lists
-      self.lists = [];
-      /*self.dataService.loadLists().then(function (snapshot) {
-        self.itemsService.reversedItems<List>(self.mappingsService.getLists(snapshot)).forEach(function (list) {
-          if (list.name.toLowerCase().includes(self.queryText.toLowerCase()))
-            self.lists.push(list);
-        });
-      });*/
-    } else { // text cleared..
-      this.loadLists(true);
-    }
+      console.debug("load_lists:end - "+ (new Date()).toString());
+    });
+*/
   }
 
   createList() {
@@ -278,31 +243,41 @@ export class ListsPage implements OnInit {
         });
         toast.present();
 
-        if (data.priority === 1)
+        /*if (data.priority === 1)
           self.newLists.push(data.list);
 
-        self.addNewLists();
+        self.addNewLists();*/
+        self.scrollToTop();
       }
     });
 
     modalPage.present();
   }
 
-  viewItems(key: string) {
-    if (this.internetConnected) {
-      this.navCtrl.push(ListItemsPage, {
-        listKey: key
-      });
-    } else {
-      this.notify('Network not found..');
-    }
+  // Notice function declarion to keep the right this reference
+  public onListAdded = (childSnapshot, prevChildKey) => {
+    let priority = childSnapshot.val(); // priority..
+    var self = this;
+    self.events.publish('list:created');
+    // fetch new list..
+    self.dataService.getListsRef().orderByPriority().equalTo(priority).once('value').then(function (dataSnapshot) {
+      let key = Object.keys(dataSnapshot.val())[0];
+      let newList: List = self.mappingsService.getList(dataSnapshot.val()[key], key);
+      console.log(newList);
+      if(newList.user.uid==self.myUser.uid){
+        console.log("lets share:"+newList.key);
+        self.dataService.shareList(newList.key);
+        //self.newLists.push(newList);
+      }      
+    });
   }
 
 
-  viewComments(key: string) {
+  viewItems(key: string, listItems: number) {
     if (this.internetConnected) {
-      this.navCtrl.push(ListCommentsPage, {
-        listKey: key
+      this.navCtrl.push(ListItemsPage, {
+        listKey: key,
+        listItems: listItems
       });
     } else {
       this.notify('Network not found..');
@@ -310,22 +285,12 @@ export class ListsPage implements OnInit {
   }
 
   reloadLists(refresher) {
-    this.queryText = '';
-    if (this.internetConnected) {
+    /*if (this.internetConnected) {
       this.loadLists(true);
       refresher.complete();
-    } else {
+    } else {*/
       refresher.complete();
-    }
-  }
-
-  fetchNextLists(infiniteScroll) {
-    if (this.start > 0 && this.internetConnected) {
-      this.loadLists(false);
-      infiniteScroll.complete();
-    } else {
-      infiniteScroll.complete();
-    }
+    //}
   }
 
   scrollToTop() {
@@ -385,27 +350,12 @@ export class ListsPage implements OnInit {
       }
   }
 
-  options() {
-    let actionSheet = this.actionSheetCtrl.create({
-        title: 'Options',
-        buttons: [
-        {
-            text: 'Logout',
-            handler: () => {
-                console.log('Logout clicked');
-                this.authService.signOut();
-            }
-        },
-        {
-            text: 'Cancel',
-            role: 'cancel',
-            handler: () => {
-                console.log('Cancel clicked');
-            }
-        }
-        ]
-    });
-    actionSheet.present();
+  friends() {
+    if( this.isUserLoggedIn() ) {
+      this.navCtrl.push(FriendsPage);
+    } else {
+      console.error("not logged in");
+    } 
   }
 
   mail(){

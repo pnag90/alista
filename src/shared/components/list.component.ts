@@ -16,7 +16,9 @@ export class ListComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         var self = this;
-        self.dataService.getListsRef().child(self.list.key).on('child_changed', self.onCommentAdded);
+        //self.dataService.getListsRef().child(self.list.key).child('items').on('child_changed', self.onListItemAdded);
+        //self.dataService.getItemsRef().child('list').equalTo(self.list.key).on('child_changed', self.onListItemAdded);
+        self.dataService.getListsRef().child(self.list.key).child('items').on('child_changed', self.onListItemAdded);
         /* TODO 
             verificar items
             */
@@ -25,7 +27,8 @@ export class ListComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         console.log('destroying..');
         var self = this;
-        self.dataService.getListsRef().child(self.list.key).off('child_changed', self.onCommentAdded);
+        //self.dataService.getListsRef().child(self.list.key).off('child_changed', self.onListItemAdded);
+        self.dataService.getListsRef().child(self.list.key).child('items').off('child_changed', self.onListItemAdded);
     }
 
     // Notice function declarion to keep the right this reference
@@ -34,7 +37,7 @@ export class ListComponent implements OnInit, OnDestroy {
         var self = this;
         // Attention: only number of items is supposed to changed.
         // Otherwise you should run some checks..
-        self.list.items = childSnapshot.val();
+        self.list.items = childSnapshot.val() || 0;
     }
 
     // Notice function declarion to keep the right this reference

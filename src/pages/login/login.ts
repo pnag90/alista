@@ -17,7 +17,6 @@ export class LoginPage implements OnInit {
     loginFirebaseAccountForm: FormGroup;
     email: AbstractControl;
     password: AbstractControl;
-    loader: any;
 
     constructor(public nav: NavController,
         public loadingCtrl: LoadingController,
@@ -37,14 +36,14 @@ export class LoginPage implements OnInit {
     }
 
     onSubmit(signInForm: any): void {
-        //var self = this;
-        if (this.loginFirebaseAccountForm.valid) {
+        var self = this;
+        if (self.loginFirebaseAccountForm.valid) {
 
-            this.loader = this.loadingCtrl.create({
+            var loader = self.loadingCtrl.create({
                 content: 'Signing in firebase..',
                 dismissOnPageChange: true
             });
-            this.loader.present();
+            loader.present();
 
             let user: UserCredentials = {
                 email: signInForm.email,
@@ -52,7 +51,17 @@ export class LoginPage implements OnInit {
             };
 
             console.log(user);
-            this.authService.signInUser(user.email, user.password).then(this.sucessfullLoginHandler,this.errorLoginHandler);
+            self.authService.signInUser(user.email, user.password).then(
+                function(data){
+                    loader.dismiss().then(function(){
+                        self.sucessfullLoginHandler(data);
+                    });
+                },
+                function(err){
+                    loader.dismiss().then(function(){
+                        self.errorLoginHandler(err)
+                    });  
+                });
             
 
             /*this.authService.signInUser(user.email, user.password)
@@ -76,19 +85,23 @@ export class LoginPage implements OnInit {
     }
 
     loginUserWithFacebook(){
-        //var self = this;
+        var self = this;
 
-        this.loader = this.loadingCtrl.create({
+        var loader = self.loadingCtrl.create({
                 content: 'Signing in facebook..',
                 dismissOnPageChange: true
             });
-        this.loader.present();
+        loader.present();
 
         //this.authService.loginWithFacebook().then(this.sucessfullLoginHandler,this.errorLoginHandler);
-        this.authService.loginWithFacebook().subscribe(data => {
-                this.sucessfullLoginHandler(data);
+        self.authService.loginWithFacebook().subscribe(data => {
+                loader.dismiss().then(function(){
+                    self.sucessfullLoginHandler(data);
+                });
             }, err => {
-                this.errorLoginHandler(err);   
+                loader.dismiss().then(function(){
+                    self.errorLoginHandler(err)
+                });   
             });    
         /*.subscribe(data => {
                 self.nav.setRoot(TabsPage);
@@ -122,14 +135,12 @@ export class LoginPage implements OnInit {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.error(errorCode + ': ' + errorMessage);
-        this.loader.dismiss().then(() => {
-            let toast = this.toastCtrl.create({
-                message: errorMessage,
-                duration: 4000,
-                position: 'top'
-            });
-            toast.present();
+        let toast = this.toastCtrl.create({
+            message: errorMessage,
+            duration: 4000,
+            position: 'top'
         });
+        toast.present();
 
         /*
         .catch(function (error) {

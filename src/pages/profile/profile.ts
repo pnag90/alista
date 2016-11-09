@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import { NavController, LoadingController, ActionSheetController } from 'ionic-angular';
+import { NavController, LoadingController, ActionSheetController, NavParams } from 'ionic-angular';
 import { Camera, CameraOptions } from 'ionic-native';
 
 import { User } from '../../shared/interfaces';
@@ -12,14 +12,17 @@ import { DataService } from '../../shared/services/data.service';
 export class ProfilePage implements OnInit {
   userDataLoaded: boolean = false;
   user: User;
+  userUid: string;
   username: string;
   userProfile = {};
   userPhotoUrl: string = null;
   firebaseAccount: any = {};
+  mySelf:boolean = false;
   userStatistics: any = {};
 
   constructor(public navCtrl: NavController,
     public loadingCtrl: LoadingController,
+    public navParams: NavParams,
     public actionSheetCtrl: ActionSheetController,
     public authService: AuthService,
     public dataService: DataService) { }
@@ -31,6 +34,7 @@ export class ProfilePage implements OnInit {
   loadUserProfile() {
     var self = this;
     self.userDataLoaded = false;
+    self.userUid = null;
     
     self.getUserData().then(function (snapshot) {
       let userData: any = snapshot.val();
@@ -41,78 +45,105 @@ export class ProfilePage implements OnInit {
       console.log(userData);
 
       self.userPhotoUrl = userData.photoURL || null;
-      if (self.userPhotoUrl==null){
+
+      self.userProfile = {
+        username: userData.username,
+        dateOfBirth: userData.dateOfBirth,
+        image: null ,
+        photoURL: userData.photoURL || null
+      };
+
+      self.user = {
+        uid : self.userUid,
+        username : userData.username
+      };
+
+      self.mySelf = self.authService.getLoggedInUser().uid === self.userUid;
+      self.userDataLoaded = true;
+      console.log("userDataLoaded 2");
+
+      /*if (self.userPhotoUrl==null){
         self.getUserImage().then(function (url) {
           self.userProfile = {
             username: userData.username,
             dateOfBirth: userData.dateOfBirth,
-            image: url,
-            totalFavorites: userData.hasOwnProperty('favorites') === true ?
-              Object.keys(userData.favorites).length : 0
+            image: null //url
           };
 
           self.user = {
-            uid : self.firebaseAccount.uid,
+            uid : self.userUid,
             username : userData.username
           };
-
+          self.mySelf = self.authService.getLoggedInUser().uid === self.userUid;
+          console.log("userDataLoaded 1");
           self.userDataLoaded = true;
         }).catch(function (error) {
           console.log(error.code);
           self.userProfile = {
             username: userData.username,
             dateOfBirth: userData.dateOfBirth,
-            image: 'assets/images/profile.png',
-            totalFavorites: userData.hasOwnProperty('favorites') === true ?
-              Object.keys(userData.favorites).length : 0
+            image: 'assets/images/profile.png' 
           };
+          self.mySelf = self.authService.getLoggedInUser().uid === self.userUid;
           self.userDataLoaded = true;
+          console.log("userDataLoaded 2");
         });
 
        } else {
          self.userProfile = {
             username: userData.username,
             dateOfBirth: userData.dateOfBirth,
-            image: null,
-            totalFavorites: userData.hasOwnProperty('favorites') === true ?
-              Object.keys(userData.favorites).length : 0
+            image: null
           };
 
           self.user = {
-            uid : self.firebaseAccount.uid,
+            uid : self.userUid,
             username : userData.username
           };
-          self.userDataLoaded = true;
-       } 
-    });
 
-    self.getUserLists();
-    self.getUserComments();
+          self.mySelf = self.authService.getLoggedInUser().uid === self.userUid;
+          self.userDataLoaded = true;
+           console.log("userDataLoaded 3");
+       } */
+
+      self.getUserLists();
+      //self.getUserComments();
+      self.getUserFriends();
+    });
   }
+  
 
   getUserData() {
     var self = this;
 
+    // a friend
+    self.userUid = self.navParams.get('userKey');
+    if( self.userUid != null ){
+      return self.dataService.getUser(self.userUid);
+    }
+
+    // my profile
     self.firebaseAccount = self.authService.getLoggedInUser();
     if( self.firebaseAccount == null ){
       return null;
     }
+    self.userUid = self.firebaseAccount.uid;
 
-    return self.dataService.getUser(self.firebaseAccount.uid);
+    return self.dataService.getUser(self.userUid);
   }
 
   getUserImage() {
     var self = this;
 
-    if( self.firebaseAccount == null )
+    if( self.userUid == null )
       return null;
-    return self.dataService.getStorageRef().child('images/' + self.firebaseAccount.uid + '/profile.png').getDownloadURL();
+    return self.dataService.getStorageRef().child('images/' + self.userUid + '/profile.png').getDownloadURL();
   }
 
   getUserLists() {
     var self = this;
-
-    self.dataService.getUserLists(self.authService.getLoggedInUser().uid)
+    console.log("getUserLists init");
+    self.dataService.getUserLists(self.userUid)
       .then(function (snapshot) {
         let userLists: any = snapshot.val();
         if (userLists !== null) {
@@ -120,13 +151,14 @@ export class ProfilePage implements OnInit {
         } else {
           self.userStatistics.totalLists = 0;
         }
+        console.log("getUserLists end "+ self.userStatistics.totalLists);
       });
   }
 
   getUserComments() {
     var self = this;
 
-    self.dataService.getUserComments(self.authService.getLoggedInUser().uid)
+    self.dataService.getUserComments(self.userUid)
       .then(function (snapshot) {
         let userComments: any = snapshot.val();
         if (userComments !== null) {
@@ -134,6 +166,22 @@ export class ProfilePage implements OnInit {
         } else {
           self.userStatistics.totalComments = 0;
         }
+      });
+  }
+
+  getUserFriends() {
+    var self = this;
+
+    console.log("getUserFriends init");
+    self.dataService.getUserFriends(self.userUid)
+      .then(function (snapshot) {
+        let userFriends: any = snapshot.val();
+        if (userFriends !== null) {
+          self.userStatistics.totalFriends = Object.keys(userFriends).length;
+        } else {
+          self.userStatistics.totalFriends = 0;
+        }
+        console.log("getUserFriends end "+ self.userStatistics.totalFriends);
       });
   }
 

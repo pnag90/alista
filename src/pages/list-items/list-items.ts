@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActionSheetController, ModalController, ToastController, LoadingController, NavParams, Content } from 'ionic-angular';
+import { ActionSheetController, ModalController, ToastController, LoadingController, NavParams, NavController, Content } from 'ionic-angular';
 
 import { ItemCreatePage } from '../item-create/item-create';
 import { ListItem } from '../../shared/interfaces';
@@ -9,6 +9,7 @@ import { ItemsService } from '../../shared/services/items.service';
 import { MappingsService } from '../../shared/services/mappings.service';
 
 @Component({
+    selector: 'list-items',
     templateUrl: 'list-items.html'
 })
 export class ListItemsPage implements OnInit {
@@ -20,7 +21,8 @@ export class ListItemsPage implements OnInit {
 
     changeStateOnClick: boolean = true;
 
-    constructor(public actionSheeCtrl: ActionSheetController,
+    constructor(public navCtrl: NavController,
+        public actionSheeCtrl: ActionSheetController,
         public modalCtrl: ModalController,
         public toastCtrl: ToastController,
         public loadingCtrl: LoadingController,
@@ -33,14 +35,53 @@ export class ListItemsPage implements OnInit {
     ngOnInit() {
         var self = this;
         self.listKey = self.navParams.get('listKey');
+        var nItems:number = self.navParams.get('listItems') || 0;
+        self.getListItems(nItems==0);
+    }
+
+    getListItems(noItems:boolean){
+        var self = this;
         self.itemsLoaded = false;
+        self.items = [];
         self.selectedItem = null;
 
-        self.dataService.getListItemsRef(self.listKey).once('value', function (snapshot) {
-            self.items = self.mappingsService.getListItems(snapshot);
+        if(noItems){
             self.itemsLoaded = true;
-            self.selectedItem = null;
+        }
+
+        //self.dataService.getListItemsRef(self.listKey).once('value', function (snapshot) {
+        //self.items = self.mappingsService.getListItems(snapshot);
+        self.dataService.getListItemsRef(self.listKey).on('child_added', function (snapshot) {
+            var item:ListItem = self.mappingsService.getListItem(snapshot, snapshot.key);
+            self.items.unshift(item);  
+            self.itemsLoaded = true; 
         }, function (error) {});
+
+        self.dataService.getListItemsRef(self.listKey).on('child_changed', function (snapshot) {
+            var item:ListItem = self.mappingsService.getListItem(snapshot, snapshot.key);
+            for(var i:number=0; i<self.items.length; i++){
+                if(self.items[i].key == item.key){
+                    self.items[i] = item;
+                    break;
+                }
+            }
+        }, function (error) {});
+
+         self.dataService.getListItemsRef(self.listKey).on('child_removed', function (snapshot) {
+            var item:ListItem = self.mappingsService.getListItem(snapshot, snapshot.key);
+            self.itemsService.removeItemFromArray(self.items, item);
+            /*
+            for(var i:number=0; i<self.items.length; i++){
+                if(self.items[i].key == item.key){
+                    self.itemsService.removeItemFromArray(self.items, self.items[i]);
+                    break;
+                }
+            }
+            self.items.unshift(item);
+            self.itemsLoaded = true;*/
+        }, function (error) {});
+
+        
     }
 
     createItem() {
@@ -49,12 +90,12 @@ export class ListItemsPage implements OnInit {
         console.log("createItem");
 
         let modalPage = this.modalCtrl.create(ItemCreatePage, {
-            listKey: this.listKey
+            listKey: self.listKey
         });
 
         modalPage.onDidDismiss((itemData: any) => {
             if (itemData) {
-                let itemVals = itemData.item;
+                /*let itemVals = itemData.item;
                 let itemUser = itemData.user;
 
                 let createdItem: ListItem = {
@@ -68,13 +109,13 @@ export class ListItemsPage implements OnInit {
                     state : 1
                 };
 
-                self.items.push(createdItem);
+                self.items.push(createdItem);*/
                 self.scrollToBottom();
 
                 let toast = this.toastCtrl.create({
                     message: 'Item created',
-                    duration: 2000,
-                    position: 'top'
+                    duration: 3000,
+                    position: 'bottom'
                 });
                 toast.present();
             }
@@ -119,7 +160,14 @@ export class ListItemsPage implements OnInit {
                     text: 'Rename',
                     icon: 'create',
                     handler: () => {
-                        //self.removeItem();
+                        self.renameList();
+                    }
+                },
+                {
+                    text: 'Remove',
+                    icon: 'trash',
+                    handler: () => {
+                        self.removeList();
                     }
                 },
                 {
@@ -145,7 +193,7 @@ export class ListItemsPage implements OnInit {
                         let toast = self.toastCtrl.create({
                             message: 'Item removed',
                             duration: 3000,
-                            position: 'top'
+                            position: 'bottom'
                         });
                         toast.present();
                     });
@@ -153,12 +201,34 @@ export class ListItemsPage implements OnInit {
                 let toast = self.toastCtrl.create({
                     message: 'This action is available only for authenticated users',
                     duration: 3000,
-                    position: 'top'
+                    position: 'bottom'
                 });
                 toast.present();
             }
 
         }
+    }
+    renameList(){
+        var self = this;
+        if( self.listKey != null ){
+        
+        }
+    }
 
+    removeList(){
+        var self = this;
+        if( self.listKey != null ){
+
+            self.dataService.removeList(self.listKey)
+                .then(function () {
+                    let toast = self.toastCtrl.create({
+                            message: 'List removed',
+                            duration: 3000,
+                            position: 'bottom'
+                        });
+                    toast.present();
+                    this.navCtrl.pop();
+                });
+        }
     }
 }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicApp, IonicModule } from 'ionic-angular';
 import { AListaApp } from './app.component';
 // Pages
+import { AuthPage } from '../pages/auth/auth';
 import { AboutPage } from '../pages/about/about';
 import { ItemCreatePage } from '../pages/item-create/item-create';
 import { CommentCreatePage } from '../pages/comment-create/comment-create';
@@ -12,6 +13,7 @@ import { ProfilePage } from '../pages/profile/profile';
 import { SignupPage } from '../pages/signup/signup';
 import { ResetPasswordPage } from '../pages/reset-password/reset-password';
 import { TabsPage } from '../pages/tabs/tabs';
+import { FriendsPage } from '../pages/friends/friends';
 import { ListItemsPage } from '../pages/list-items/list-items';
 import { ListCommentsPage } from '../pages/list-comments/list-comments';
 import { ListCreatePage } from '../pages/list-create/list-create';
@@ -25,6 +27,7 @@ import { APP_PROVIDERS } from '../providers/app.providers';
 @NgModule({
   declarations: [
     AListaApp,
+    AuthPage,
     AboutPage,
     ItemCreatePage,
     CommentCreatePage,
@@ -33,6 +36,7 @@ import { APP_PROVIDERS } from '../providers/app.providers';
     SignupPage,
     ResetPasswordPage,
     TabsPage,
+    FriendsPage,
     ListItemsPage,
     ListCommentsPage,
     ListCreatePage,
@@ -48,6 +52,7 @@ import { APP_PROVIDERS } from '../providers/app.providers';
   bootstrap: [IonicApp],
   entryComponents: [
     AListaApp,
+    AuthPage,
     AboutPage,
     ItemCreatePage,
     CommentCreatePage,
@@ -56,6 +61,7 @@ import { APP_PROVIDERS } from '../providers/app.providers';
     SignupPage,
     ResetPasswordPage,
     TabsPage,
+    FriendsPage,
     ListItemsPage,
     ListCommentsPage,
     ListCreatePage,

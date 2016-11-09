@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-navbar no-border-bottom>
+    <ion-segment [(ngModel)]="segment" (ionChange)="filterFriends(segment)">
+      <ion-segment-button value="friends">
+        Friends
+      </ion-segment-button>
+      <ion-segment-button value="all">
+        All users
+      </ion-segment-button>
+    </ion-segment>  
+  </ion-navbar>
+</ion-header>
+
+<ion-content style="background: url(assets/images/bg2.jpg) center; background-size: cover;">
+
+  <ion-searchbar [(ngModel)]="queryText" (ionInput)="searchFriends()" placeholder="Search..." ></ion-searchbar>
+
+  <ion-refresher (ionRefresh)="reloadData($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading">
+    <img src="assets/images/ring.gif" style="display:block; margin:auto" />
+  </div>
+
+  <div [ngSwitch]="selectedSegment" *ngIf="!loading">  
+    <ion-list *ngSwitchCase="'friends'" class="friends-list-main">
+      <ion-item *ngFor="let friend of friends" (click)="viewProfile(friend.uid)" text-wrap>
+        <!-- 
+          <ion-thumbnail item-left>
+        <img src="img/thumbnail-kitten-1.jpg">
+      </ion-thumbnail>
+      -->
+          <h2>{{friend.username}}</h2>
+          <p *ngIf="user.dateOfBirth">{{user.dateOfBirth}}</p>
+      </ion-item>
+    </ion-list>
+
+    <ion-list *ngSwitchCase="'all'" class="friends-list-main">
+      <ion-item *ngFor="let user of users" (click)="viewProfile(user.uid)" text-wrap>
+          <h2>{{user.username}}</h2>
+          <p *ngIf="user.dateOfBirth">{{user.dateOfBirth}}</p>
+          <button ion-button clear item-right (click)="friendRequest(user.uid)">Add friend</button>
+      </ion-item>
+    </ion-list>
+  </div>   
+
+  <ion-infinite-scroll (ionInfinite)="fetchNextFriends($event)" threshold="10px" *ngIf="(start > 0) && (queryText.trim().length == 0) && internetConnected">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

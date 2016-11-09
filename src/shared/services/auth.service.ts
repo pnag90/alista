@@ -38,6 +38,10 @@ export class AuthService {
         return firebase.auth().signInWithEmailAndPassword(email, password);
     }
 
+    creatUserProfile(profile:any) {
+        return this.usersRef.child(profile.uid).set(profile);
+    }
+
     loginWithFacebook() {
         var self = this;
 
@@ -48,14 +52,18 @@ export class AuthService {
                 Facebook.login(['public_profile', 'email']).then(facebookData => {
                     var provider = firebase.auth.FacebookAuthProvider.credential(facebookData.authResponse.accessToken);
                     firebase.auth().signInWithCredential(provider).then((firebaseData) => {
-                         console.log("Firebase success: " + JSON.stringify(firebaseData));
+                        console.log("Firebase success: " + JSON.stringify(firebaseData));
 
-                        console.log(firebaseData);
-                        firebase.database().ref('users/' + firebaseData.uid).set({
+                        console.debug(firebaseData);
+                        self.creatUserProfile({
+                            uid: firebaseData.uid,
                             username: firebaseData.providerData[0].displayName,
                             email: firebaseData.providerData[0].email,
-                            photoURL : firebaseData.providerData[0].photoURL
+                            dateOfBirth: firebaseData.providerData[0].dateOfBirth || null,
+                            image: false,
+                            photoURL: firebaseData.providerData[0].photoURL || null
                         });
+
                         observer.next();
                     });
                 }, error => {
@@ -72,14 +80,22 @@ export class AuthService {
                 firebase.auth().signInWithPopup(provider).then(function(result) {
                     //var token = result.credential.accessToken;
                     var user = result.user;
-                    console.log(result);
-                    console.log(result.user);
+                    console.debug(user);
 
-                    firebase.database().ref('users/' + user.uid).set({
+                    self.creatUserProfile({
+                        uid: user.uid,
+                        username: user.providerData[0].displayName,
+                        email: user.providerData[0].email,
+                        dateOfBirth: user.providerData[0].dateOfBirth || null,
+                        image: false,
+                        photoURL: user.providerData[0].photoURL || null
+                    });
+
+                    /*firebase.database().ref('users/' + user.uid).set({
                         username: user.providerData[0].displayName,
                         email: user.providerData[0].email,
                         photoURL : user.providerData[0].photoURL || null
-                    });
+                    });*/
 
                     observer.next();
                 }).catch(function(error) {
@@ -87,46 +103,13 @@ export class AuthService {
                     observer.error(error);
                 });
 
-                /*firebase.auth.login({
-                    provider: AuthProviders.Facebook,
-                    method: AuthMethods.Popup,
-                    remember: 'default',
-                    scope: ['public_profile', 'email']
-                }).then((facebookData) => {
-                    this.usersRef.update(facebookData.auth.uid, {
-                        name: facebookData.auth.displayName,
-                        email: facebookData.auth.email,
-                        provider: 'facebook',
-                        image: facebookData.auth.photoURL
-                    });
-                    observer.next();
-                }).catch((error) => {
-                    console.info("error", error);
-                    observer.error(error);
-                });*/
-
             }
         });
     }
 
     signOut() {
         //return this.af.auth.logout();
-        let toast = this.toastCtrl.create({
-            message: 'Logged out successfully',
-            duration: 3000,
-            position: 'middle'
-        });
-        toast.present();
         return firebase.auth().signOut();  
-    }
-
-    addUser(username: string, dateOfBirth: string, email: string, uid: string) {
-        this.usersRef.child(uid).update({
-            username: username,
-            dateOfBirth: dateOfBirth,
-            email: email,
-            friends: null
-        });
     }
 
     getLoggedInUser() {
@@ -135,18 +118,6 @@ export class AuthService {
 
     onAuthStateChanged(callback) {
         return firebase.auth().onAuthStateChanged(callback);
-        /*
-        onAuthStateChanged(_function) {
-        return firebase.auth().onAuthStateChanged((_currentUser) => {
-            if (_currentUser) {
-                console.log("User " + _currentUser.uid + " is logged in with " + _currentUser.provider);
-                _function(_currentUser);
-            } else {
-                console.log("User is logged out");
-                _function(null)
-            }
-        })
-        }*/
     }
 
     sendPasswordResetEmail(email) {

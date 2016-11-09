@@ -4,8 +4,7 @@ import { NavController, Events, ActionSheetController, ModalController , Tabs } 
 import { ListsPage } from '../lists/lists';
 import { ProfilePage } from '../profile/profile';
 import { AboutPage } from '../about/about';
-import { LoginPage } from '../login/login';
-import { SignupPage } from '../signup/signup';
+import { FriendsPage } from '../friends/friends';
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
@@ -17,8 +16,7 @@ export class TabsPage implements OnInit {
     public listsPage: any;
     public profilePage: any;
     public aboutPage: any;
-    public loginPage: any;
-    public signUpPage: any;
+    public friendsPage: any;
 
     public newLists: string = '';
     public selectedTab: number = -1;
@@ -33,8 +31,7 @@ export class TabsPage implements OnInit {
         this.listsPage = ListsPage;
         this.profilePage = ProfilePage;
         this.aboutPage = AboutPage;
-        this.loginPage = LoginPage;
-        this.signUpPage = SignupPage;
+        this.friendsPage = FriendsPage;
     }
 
     ngOnInit() {
@@ -69,7 +66,7 @@ export class TabsPage implements OnInit {
     profile() {
         var self = this;
         if( !this.isUserLoggedIn() ) {
-            let actionSheet = this.actionSheetCtrl.create({
+            /*let actionSheet = this.actionSheetCtrl.create({
                 title: 'Account',
                 buttons: [
                 {
@@ -96,7 +93,7 @@ export class TabsPage implements OnInit {
                 }
                 ]
             });
-            actionSheet.present();
+            actionSheet.present();*/
         }else{
             self.nav.setRoot(ProfilePage);
         }

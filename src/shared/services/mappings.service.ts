@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { List, ListItem, ListComment } from '../interfaces';
+import { List, ListItem, ListComment, User, UserProfile } from '../interfaces';
 import { ItemsService } from '../services/items.service';
 
 @Injectable()
@@ -32,15 +32,20 @@ export class MappingsService {
     }
 
     getList(snapshot: any, key: string): List {
+        let list: List;
 
-        let list: List = {
-            key: key,
-            name: snapshot.name,
-            dateCreated: snapshot.dateCreated,
-            user: { uid: snapshot.user.uid, username: snapshot.user.username },
-            items: snapshot.items == null ? 0 : snapshot.items,
-            comments: snapshot.comments == null ? 0 : snapshot.comments,
-            shares: snapshot.shares == null ? 0 : snapshot.shares
+        if (snapshot.val() == null)
+            return null;
+
+        let snapshotList = snapshot.val();    
+        list = {
+            key: key || snapshotList.key,
+            name: snapshotList.name,
+            dateCreated: snapshotList.dateCreated,
+            user: { uid: snapshotList.user.uid, username: snapshotList.user.username },
+            items: snapshotList.items == null ? 0 : snapshotList.items,
+            comments: snapshotList.comments == null ? 0 : snapshotList.comments,
+            shares: snapshotList.shares == null ? 0 : snapshotList.shares
         };
 
         return list;
@@ -55,7 +60,6 @@ export class MappingsService {
 
         Object.keys(snapshot.val()).map((key: any) => {
             let item: any = list[key];
-            //console.log(comment.votes);
             this.itemsService.groupByBoolean(item.votes, true);
 
             items.push({
@@ -80,9 +84,8 @@ export class MappingsService {
             return null;
 
         let snapshotItem = snapshot.val();
-        console.log(snapshotItem);
         item = {
-            key: itemKey,
+            key: itemKey || snapshot.key,
             list: snapshotItem.list,
             user: snapshotItem.user,
             text: snapshotItem.text,
@@ -140,6 +143,85 @@ export class MappingsService {
         };
 
         return comment;
+    }
+
+
+    getUsers(snapshot: any): Array<User> {
+        let users: Array<User> = [];
+        if (snapshot.val() == null)
+            return users;
+
+        let list = snapshot.val();
+
+        Object.keys(snapshot.val()).map((key: any) => {
+            let user: any = list[key];
+            
+            users.push({
+                uid: key,
+                username: user.username
+            });
+        });
+
+        return users;
+    }
+
+    getUser(snapshot: any, userKey: string): User {
+        let user: User;
+
+        if (snapshot.val() == null)
+            return null;
+
+        let snapshotUser = snapshot.val();
+        console.log(snapshotUser);
+        user = {
+            uid: userKey || snapshotUser.key,
+            username: snapshotUser.username
+        };
+
+        return user;
+    }
+
+    getUserProfiles(snapshot: any): Array<UserProfile> {
+        let profiles: Array<UserProfile> = [];
+        if (snapshot.val() == null)
+            return profiles;
+
+        let list = snapshot.val();
+
+        Object.keys(snapshot.val()).map((key: any) => {
+            let profile: any = list[key];
+            
+            profiles.push({
+                uid: key,
+                username: profile.username,
+                email: profile.email,
+                dateOfBirth: profile.dateOfBirth || null,
+                image: profile.image || null,
+                photoURL: profile.photoURL || null
+            });
+        });
+
+        return profiles;
+    }
+
+    getUserProfile(snapshot: any, userKey: string): UserProfile {
+        let profile: UserProfile;
+
+        if (snapshot.val() == null)
+            return null;
+
+        let snapshotUser = snapshot.val();
+        console.log(snapshotUser);
+        profile = {
+            uid: userKey || snapshotUser.key,
+            username: snapshotUser.username,
+            email: snapshotUser.email,
+            dateOfBirth: snapshotUser.dateOfBirth || null,
+            image: snapshotUser.image || false,
+            photoURL: snapshotUser.photoURL || null
+        };
+
+        return profile;
     }
 
 }

@@ -1,20 +1,27 @@
-.platform-ios .fixed-div {
-  right: 0;
-    bottom: 0;
-    margin-bottom: 42px;
-}
+list-items {
+  
+  ion-note {
+    font-size: 12px;
+    color: rgba(0,0,0,0.8);
+  }
 
-.platform-android .fixed-div {
-  right: 0;
-    bottom: 0;
-    margin-bottom: 56px;
-}
+  .list-item-title {
+    font-size: 16px;
+    padding: 0 6px;
+    vertical-align: middle;
+    margin-top: 6px;
+  }
 
-.platform-windows .fixed-div {
-  right: 0;
-    bottom: 0;
-}
+  .listItemState2 > * {
+    text-decoration: line-through;
+    color: rgba(0,0,0,0.61);
+  }
 
-ion-card .item + ion-card-content {
-    padding-top: 7px;
+  .wordwrap { 
+    white-space: normal;      /* CSS3 */   
+    white-space: -moz-pre-wrap; /* Firefox */    
+    white-space: -pre-wrap;     /* Opera <7 */   
+    white-space: -o-pre-wrap;   /* Opera 7 */    
+    word-wrap: break-word;      /* IE */
+  }
 }
