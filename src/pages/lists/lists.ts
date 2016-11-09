@@ -199,7 +199,7 @@ export class ListsPage implements OnInit {
           }
       }
     });
-
+    
     self.dataService.getListsRef().on('child_changed', function(changeSnap) {
       console.log("lists : child_changed : "+changeSnap.key);
       console.log(changeSnap.val());
