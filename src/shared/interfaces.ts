@@ -7,6 +7,7 @@ export interface List {        //list
     items: number;
     comments: number;
     shares: number;
+    users: Array<any>;
 }
 
 // sqlite: ListItems ; firebase: items
@@ -51,6 +52,7 @@ export interface UserProfile {
     image?: boolean;
     photoURL?: string;
     friendship?: string;
+    photo: boolean;
 }
 
 export interface Predicate<T> {

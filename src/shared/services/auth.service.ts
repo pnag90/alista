@@ -133,4 +133,8 @@ export class AuthService {
             });
      }
 
+     isAuthenticated(){
+          return firebase.auth().currentUser != null;
+     }
+
 }

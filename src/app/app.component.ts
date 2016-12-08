@@ -1,5 +1,5 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-import { Platform, MenuController, ViewController, Events, ModalController } from 'ionic-angular';
+import { Platform, MenuController, NavController, ViewController, Events, ModalController } from 'ionic-angular';
 import { Network, Splashscreen, StatusBar } from 'ionic-native';
 import { Subscription } from '../../node_modules/rxjs/Subscription';
 
@@ -10,7 +10,7 @@ import { TabsPage} from '../pages/tabs/tabs';
 import { LoginPage } from '../pages/login/login';
 //import { ListsPage } from '../pages/lists/lists';
 import { SignupPage } from '../pages/signup/signup';
-import { AuthPage } from '../pages/auth/auth';
+//import { AuthPage } from '../pages/auth/auth';
 
 //import * as firebase from 'firebase';
 
@@ -23,8 +23,8 @@ export class AListaApp implements OnInit {
   @ViewChild('content') nav: any;
 
   public rootPage: any;
-  public homePage: AuthPage;
-  public loginPage: LoginPage;
+  public homePage: any;
+  public loginPage: any;
 
   connectSubscription: Subscription;
 
@@ -37,8 +37,6 @@ export class AListaApp implements OnInit {
     public modalCtrl: ModalController) {
     
     var self = this;
-   //this.rootPage = TabsPage; // ListsPage; //TabsPage; ListsPage AuthPage
-
 /*
     const firebaseConfig = {
       apiKey: "AIzaSyDMe9yFePVXg8vUfWznjqFwsV-5QlrjQEw",
@@ -49,6 +47,7 @@ export class AListaApp implements OnInit {
     firebase.initializeApp(firebaseConfig);*/
 
     platform.ready().then(() => {
+
       if (window.cordova) {
         // Okay, so the platform is ready and our plugins are available.
         // Here you can do any higher level native things you might need.
@@ -62,6 +61,11 @@ export class AListaApp implements OnInit {
         console.log(array);
         self.sqliteService.InitDatabase();
       }
+
+      this.rootPage = TabsPage; // ListsPage; //TabsPage; ListsPage AuthPage
+      this.homePage = TabsPage;
+      this.loginPage = LoginPage;
+
     });
   }
 
@@ -101,6 +105,10 @@ export class AListaApp implements OnInit {
     }
   }
 
+  private setRoot(newRootPage: any){
+    this.rootPage = newRootPage;
+  }
+
   ngOnInit() {
 
   }
@@ -130,13 +138,23 @@ export class AListaApp implements OnInit {
       if (!(viewCtrl.instance instanceof SignupPage))
         this.nav.push(SignupPage);
     }
+    else {
+      this.nav.setRoot(page);
+    }
   }
 
   signout() {
     var self = this;
     self.menu.close();
     self.authService.signOut().then(function(){
-        self.nav.setRoot(LoginPage);
+        /*this.navCtrl.setRoot(LoginPage).then(data => {
+                  console.log(`Data is ${data}`);
+              }, (error) => {
+                  console.log(`Error is ${error}`);
+              });*/
+
+        //self.nav.setRoot(LoginPage);
+        this.nav.parent.pop();
         let toast = this.toastCtrl.create({
             message: 'Logged out successfully',
             duration: 3000,

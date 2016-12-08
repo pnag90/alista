@@ -215,6 +215,10 @@ export class DataService {
         });
     }
 
+    loadUsersByList(listKey:string){
+        return this.listsRef.child(listKey).child('users').once('value');
+    }
+
     submitList(list: List, priority: number) {
         var self = this;
         var newListRef = self.listsRef.push();
@@ -249,27 +253,43 @@ export class DataService {
     }
 
     shareList(listKey: string) {
-        console.log("sharing list: "+listKey);
         var userKey: string = firebase.auth().currentUser.uid;
-        return this.userListsRef.child(userKey).child(listKey).set(true);
+        return this.shareListWith(listKey,userKey);
     }
     unshareList(listKey: string) {
         var userKey: string = firebase.auth().currentUser.uid;
-        return this.userListsRef.child(userKey).child(listKey).set(null);
+        return this.unshareListWith(listKey,userKey);
+    }
+
+    shareListWith(listKey: string, userKey:string) {
+        console.log("sharing list: "+listKey);
+        var updates = {};
+        updates['/lists/' + listKey + '/users/' + userKey] = true;
+        updates['/user-lists/' + userKey + '/'+ listKey] = true;
+        //return this.userListsRef.child(userKey).child(listKey).set(true);
+        return this.databaseRef.ref().update(updates);
+    }
+    unshareListWith(listKey: string, userKey:string) {
+        console.log("unsharing list: "+listKey);
+        //return this.userListsRef.child(userKey).child(listKey).set(null);
+        var updates = {};
+        updates['/lists/' + listKey + '/users/' + userKey] = null;
+        updates['/user-lists/' + userKey + '/'+ listKey] = null;
+        return this.databaseRef.ref().update(updates);
     }
 
     getFavoriteLists(user: string) {
         return this.usersRef.child(user + '/favorites/').once('value');
     }
 
-    setUserImage(uid: string) {
-        this.usersRef.child(uid).update({
+    setUserImage(uid: string, url: string) {
+        /*this.usersRef.child(uid).update({
             image: true
-        });
-    }
-
-    getFriends(user: string) {
-        return this.usersRef.child(user).child('friends').once('value');
+        });*/
+        var updates = {};
+        updates['/users/' + uid + '/image'] = true;
+        updates['/users/' + uid + '/photoURL'] = url;
+        return this.databaseRef.ref().update(updates);
     }
 
     addFriend(user1: string, user2: string){
@@ -376,7 +396,8 @@ export class DataService {
     }
     
     getUserFriends(userUid: string) {
-        return this.usersRef.child(userUid + '/friends').once('value');
+        return this.usersRef.child(userUid).child('friends').once('value');
     }
+    
 
 }

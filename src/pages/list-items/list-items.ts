@@ -2,7 +2,9 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActionSheetController, ModalController, ToastController, LoadingController, NavParams, NavController, Content } from 'ionic-angular';
 
 import { ItemCreatePage } from '../item-create/item-create';
+import { ListSharePage } from '../list-share/list-share';
 import { ListItem } from '../../shared/interfaces';
+import { List } from '../../shared/interfaces';
 import { AuthService } from '../../shared/services/auth.service';
 import { DataService } from '../../shared/services/data.service';
 import { ItemsService } from '../../shared/services/items.service';
@@ -14,7 +16,7 @@ import { MappingsService } from '../../shared/services/mappings.service';
 })
 export class ListItemsPage implements OnInit {
     @ViewChild(Content) content: Content;
-    listKey: string;
+    list: List;
     itemsLoaded: boolean = false;
     items: ListItem[];
     selectedItem: ListItem;
@@ -34,8 +36,8 @@ export class ListItemsPage implements OnInit {
 
     ngOnInit() {
         var self = this;
-        self.listKey = self.navParams.get('listKey');
-        var nItems:number = self.navParams.get('listItems') || 0;
+        self.list = self.navParams.get('list') || null;
+        var nItems:number = self.list.items || 0;
         self.getListItems(nItems==0);
     }
 
@@ -51,13 +53,13 @@ export class ListItemsPage implements OnInit {
 
         //self.dataService.getListItemsRef(self.listKey).once('value', function (snapshot) {
         //self.items = self.mappingsService.getListItems(snapshot);
-        self.dataService.getListItemsRef(self.listKey).on('child_added', function (snapshot) {
+        self.dataService.getListItemsRef(self.list.key).on('child_added', function (snapshot) {
             var item:ListItem = self.mappingsService.getListItem(snapshot, snapshot.key);
             self.items.unshift(item);  
             self.itemsLoaded = true; 
         }, function (error) {});
 
-        self.dataService.getListItemsRef(self.listKey).on('child_changed', function (snapshot) {
+        self.dataService.getListItemsRef(self.list.key).on('child_changed', function (snapshot) {
             var item:ListItem = self.mappingsService.getListItem(snapshot, snapshot.key);
             for(var i:number=0; i<self.items.length; i++){
                 if(self.items[i].key == item.key){
@@ -67,7 +69,7 @@ export class ListItemsPage implements OnInit {
             }
         }, function (error) {});
 
-         self.dataService.getListItemsRef(self.listKey).on('child_removed', function (snapshot) {
+         self.dataService.getListItemsRef(self.list.key).on('child_removed', function (snapshot) {
             var item:ListItem = self.mappingsService.getListItem(snapshot, snapshot.key);
             self.itemsService.removeItemFromArray(self.items, item);
             /*
@@ -90,7 +92,7 @@ export class ListItemsPage implements OnInit {
         console.log("createItem");
 
         let modalPage = this.modalCtrl.create(ItemCreatePage, {
-            listKey: self.listKey
+            listKey: self.list.key
         });
 
         modalPage.onDidDismiss((itemData: any) => {
@@ -153,9 +155,7 @@ export class ListItemsPage implements OnInit {
 
     showItemActions() {
         var self = this;
-        let actionSheet = self.actionSheeCtrl.create({
-            title: 'List Actions',
-            buttons: [
+        var buttons = [
                 {
                     text: 'Rename',
                     icon: 'create',
@@ -172,10 +172,25 @@ export class ListItemsPage implements OnInit {
                 },
                 {
                     text: 'Cancel',
+                    icon: 'close',
                     role: 'cancel',
                     handler: () => { }
                 }
-            ]
+            ];
+
+        if(self.list.user.uid==self.authService.getLoggedInUser().uid){
+            buttons.push({
+                    text: 'Share',
+                    icon: 'share-alt',
+                    handler: () => {
+                        self.shareList();
+                    }
+                });
+        }    
+
+        let actionSheet = self.actionSheeCtrl.create({
+            title: 'List Actions',
+            buttons: buttons
         });
 
         actionSheet.present();
@@ -188,7 +203,7 @@ export class ListItemsPage implements OnInit {
 
             let currentUser = self.authService.getLoggedInUser();
             if (currentUser != null) {
-                self.dataService.deleteListItem(self.listKey, item)
+                self.dataService.deleteListItem(self.list.key, item)
                     .then(function () {
                         let toast = self.toastCtrl.create({
                             message: 'Item removed',
@@ -210,16 +225,16 @@ export class ListItemsPage implements OnInit {
     }
     renameList(){
         var self = this;
-        if( self.listKey != null ){
+        if( self.list.key != null ){
         
         }
     }
 
     removeList(){
         var self = this;
-        if( self.listKey != null ){
+        if( self.list.key != null ){
 
-            self.dataService.removeList(self.listKey)
+            self.dataService.removeList(self.list.key)
                 .then(function () {
                     let toast = self.toastCtrl.create({
                             message: 'List removed',
@@ -227,8 +242,15 @@ export class ListItemsPage implements OnInit {
                             position: 'bottom'
                         });
                     toast.present();
-                    this.navCtrl.pop();
+                    self.navCtrl.pop();
                 });
+        }
+    }
+
+    shareList(){
+        var self = this;
+        if( self.list.key != null) {
+            this.navCtrl.push(ListSharePage, { list: self.list });
         }
     }
 }

@@ -23,25 +23,35 @@
     <img src="assets/images/ring.gif" style="display:block; margin:auto" />
   </div>
 
-  <div [ngSwitch]="selectedSegment" *ngIf="!loading">  
+  <div [ngSwitch]="selectedSegment" *ngIf="!loading && (friends.init || users.init)">  
     <ion-list *ngSwitchCase="'friends'" class="friends-list-main">
-      <ion-item *ngFor="let friend of friends" (click)="viewProfile(friend.uid)" text-wrap>
-        <!-- 
+     <!-- <ion-item *ngFor="let friend of friends" text-wrap>
           <ion-thumbnail item-left>
-        <img src="img/thumbnail-kitten-1.jpg">
-      </ion-thumbnail>
-      -->
-          <h2>{{friend.username}}</h2>
-          <p *ngIf="user.dateOfBirth">{{user.dateOfBirth}}</p>
+            <img src="img/thumbnail-kitten-1.jpg">
+          </ion-thumbnail>
+
+          <h2 (click)="viewProfile(friend)">{{friend.username}}</h2>
+          <p  (click)="viewProfile(friend)" *ngIf="friend.dateOfBirth">{{friend.dateOfBirth}}</p>
       </ion-item>
+      -->
+      <friend-component *ngFor="let friend of friends.list" [user]="friend" [friend]="true" (onViewProfile)="viewProfile($event)">
+      </friend-component>
     </ion-list>
 
     <ion-list *ngSwitchCase="'all'" class="friends-list-main">
-      <ion-item *ngFor="let user of users" (click)="viewProfile(user.uid)" text-wrap>
-          <h2>{{user.username}}</h2>
-          <p *ngIf="user.dateOfBirth">{{user.dateOfBirth}}</p>
-          <button ion-button clear item-right (click)="friendRequest(user.uid)">Add friend</button>
-      </ion-item>
+      <!--<ion-item *ngFor="let user of users" text-wrap>
+          <h2 (click)="viewProfile(user)">{{user.username}}</h2>
+          <p  (click)="viewProfile(user)" *ngIf="user.dateOfBirth">{{user.dateOfBirth}}</p>
+          <button ion-button clear item-right (click)="friendRequest(user)">
+            <span *ngIf="user.friendship!='send' && user.friendship!='pending' && user.friendship!='friends'"> Add friend </span>
+            <span *ngIf="user.friendship=='send'"> Pending </span>
+            <span *ngIf="user.friendship=='pending'"> Accept </span>
+            <span *ngIf="user.friendship=='friends'"> Friend </span>
+          </button>
+      </ion-item>-->
+      <friend-component *ngFor="let user of users.list" [user]="user" [friend]="false" (onViewProfile)="viewProfile($event)" (onFriendRequest)="friendRequest($event)">
+      </friend-component>
+
     </ion-list>
   </div>   
 

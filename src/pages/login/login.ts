@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, LoadingController, ToastController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators, AbstractControl} from '@angular/forms';
 
-import { ListsPage } from '../lists/lists';
+import { TabsPage } from '../tabs/tabs';
 import { SignupPage } from '../signup/signup';
 import { UserCredentials } from '../../shared/interfaces';
 import { AuthService } from '../../shared/services/auth.service';
@@ -62,25 +62,6 @@ export class LoginPage implements OnInit {
                         self.errorLoginHandler(err)
                     });  
                 });
-            
-
-            /*this.authService.signInUser(user.email, user.password)
-                .then(function (result) {
-                    self.nav.setRoot(TabsPage);
-                }).catch(function (error) {
-                    // Handle Errors here.
-                    var errorCode = error.code;
-                    var errorMessage = error.message;
-                    console.error(errorCode + ': ' + errorMessage);
-                    loader.dismiss().then(() => {
-                        let toast = self.toastCtrl.create({
-                            message: errorMessage,
-                            duration: 4000,
-                            position: 'top'
-                        });
-                        toast.present();
-                    });
-                });*/
         }
     }
 
@@ -103,26 +84,10 @@ export class LoginPage implements OnInit {
                     self.errorLoginHandler(err)
                 });   
             });    
-        /*.subscribe(data => {
-                self.nav.setRoot(TabsPage);
-            }, err => {
-                // Handle Errors here.
-                var errorCode = err.code;
-                var errorMessage = err.message;
-                console.error(errorCode + ': ' + errorMessage);
-                loader.dismiss().then(() => {
-                    let toast = self.toastCtrl.create({
-                        message: errorMessage,
-                        duration: 4000,
-                        position: 'top'
-                    });
-                    toast.present();
-                });
-            });*/
     }
 
     sucessfullLoginHandler(res): void{
-        this.nav.setRoot(ListsPage);
+        this.nav.setRoot(TabsPage);
         let toast = this.toastCtrl.create({
             message: 'Logged in successfully',
             duration: 3000,
@@ -141,24 +106,6 @@ export class LoginPage implements OnInit {
             position: 'top'
         });
         toast.present();
-
-        /*
-        .catch(function (error) {
-        switch (error.code) {
-          case "INVALID_USER":
-            console.log("Invalid email");
-            this.login_error = "Email is invalid";
-            break;
-
-          case "INVALID_PASSWORD":
-            console.log("Invalid password");
-            this.login_error = "Password is invalid";
-            break;
-
-          default:
-            break;   
-        }
-      });*/
     }
 
     register() {

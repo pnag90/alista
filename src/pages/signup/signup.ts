@@ -196,7 +196,7 @@ export class SignupPage implements OnInit {
                     // Upload completed successfully, now we can get the download URL
                     var downloadURL = uploadTask.snapshot.downloadURL;
                     console.log("Upload completed successfully, now we can get the download URL: "+downloadURL);
-                    self.dataService.setUserImage(uid);
+                    self.dataService.setUserImage(uid,downloadURL);
                 });
             });
     }

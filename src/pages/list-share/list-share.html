@@ -1,0 +1,26 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Share</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content style="background: url(assets/images/bg2.jpg) center; background-size: cover;">
+
+  <ion-searchbar [(ngModel)]="queryText" (ionInput)="searchFriends()" placeholder="Search..." ></ion-searchbar>
+
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading">
+    <img src="assets/images/ring.gif" style="display:block; margin:auto" />
+  </div>
+
+  <ion-list class="friends-list-main">
+
+      <friend-component *ngFor="let friend of friendsToShow" [user]="friend" [sharing]="true" [friend]="true" (onShare)="share($event)">
+      </friend-component>
+
+  </ion-list>
+    
+</ion-content>

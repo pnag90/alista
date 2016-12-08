@@ -63,7 +63,8 @@ export class ListCreatePage implements OnInit {
           let newList: List = {
             key: null,
             name: list.name,
-            user: { uid: uid, username: username },
+            user: { uid: uid, username: username }, 
+            users: null,
             dateCreated: new Date().toString(),
             comments: 0,
             items: 0,

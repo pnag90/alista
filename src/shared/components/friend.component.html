@@ -1,0 +1,22 @@
+<ion-item text-wrap>
+
+    <ion-thumbnail class="user-thumbnail" item-left>
+        <img *ngIf="imageLoaded" src="{{imageUrl}}" (click)="zoom()" class="user-thumbnail portrait">
+    </ion-thumbnail>
+
+    <h2 (click)="viewProfile(user)">{{user.username}}</h2>
+    <p  (click)="viewProfile(user)" *ngIf="user.dateOfBirth">{{user.dateOfBirth}}</p>
+
+    <button ion-button clear item-right (click)="friendRequest(user)" *ngIf="!friend">
+        <span *ngIf="user.friendship!='send' && user.friendship!='pending' && user.friendship!='friends'"> Add friend </span>
+        <span *ngIf="user.friendship=='send'"> Pending </span>
+        <span *ngIf="user.friendship=='pending'"> Accept </span>
+        <span *ngIf="user.friendship=='friends'"> Friend </span>
+    </button>
+
+    <button ion-button clear item-right (click)="share(user)" *ngIf="sharing">
+        <span *ngIf="!user.member"> Share </span>
+        <span *ngIf="user.member"> Unshare </span>
+    </button>
+
+</ion-item>

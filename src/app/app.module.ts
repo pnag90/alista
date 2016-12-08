@@ -16,10 +16,12 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { FriendsPage } from '../pages/friends/friends';
 import { ListItemsPage } from '../pages/list-items/list-items';
 import { ListCommentsPage } from '../pages/list-comments/list-comments';
+import { ListSharePage } from '../pages/list-share/list-share';
 import { ListCreatePage } from '../pages/list-create/list-create';
 import { ListsPage } from '../pages/lists/lists';
 // Custom components
 import { ListComponent } from '../shared/components/list.component';
+import { FriendComponent } from '../shared/components/friend.component';
 import { UserAvatarComponent } from '../shared/components/user-avatar.component';
 // providers
 import { APP_PROVIDERS } from '../providers/app.providers';
@@ -39,10 +41,12 @@ import { APP_PROVIDERS } from '../providers/app.providers';
     FriendsPage,
     ListItemsPage,
     ListCommentsPage,
+    ListSharePage,
     ListCreatePage,
     ListsPage,
     ListComponent,
-    UserAvatarComponent
+    UserAvatarComponent,
+    FriendComponent
   ],
   imports: [
     IonicModule.forRoot(AListaApp),
@@ -64,6 +68,7 @@ import { APP_PROVIDERS } from '../providers/app.providers';
     FriendsPage,
     ListItemsPage,
     ListCommentsPage,
+    ListSharePage,
     ListCreatePage,
     ListsPage
   ],

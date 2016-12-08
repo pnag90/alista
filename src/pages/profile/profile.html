@@ -4,8 +4,8 @@
             <ion-icon name='menu'></ion-icon>
         </button>-->
         <ion-title>Profile</ion-title>
-        <ion-buttons end *ngIf="mySelf">
-            <button ion-button (click)="openImageOptions()">
+        <ion-buttons end>
+            <button *ngIf="mySelf" ion-button (click)="openImageOptions()">
                 <ion-icon name="camera"></ion-icon>
             </button>
             <!--
@@ -13,7 +13,10 @@
                 <ion-icon name="refresh"></ion-icon>
             </button>
             -->
-            <button ion-button (click)="options()">
+            <button *ngIf="mySelf" ion-button (click)="options()">
+                <ion-icon name="settings"></ion-icon>
+            </button>
+            <button *ngIf="!mySelf && userProfile.friendship=='friends'" ion-button (click)="friendOptions()">
                 <ion-icon name="settings"></ion-icon>
             </button>
         </ion-buttons>
@@ -31,10 +34,10 @@
         <ion-item>
             <ion-thumbnail item-left>
                 <!--<img src="{{userProfile.image}}">-->
-                <lista-user-avatar [user]="user" [profile]="userProfile" *ngIf="userDataLoaded"></lista-user-avatar>
+                <lista-user-avatar [profile]="userProfile" *ngIf="userDataLoaded"></lista-user-avatar>
             </ion-thumbnail>
             <h2>{{userProfile.username}}</h2>
-            <p>{{firebaseAccount.email}}</p>
+            <p>{{userProfile.email}}</p>
         </ion-item>
 
         <ion-item>
@@ -63,13 +66,13 @@
 
         <ion-item>
             # Lists
-            <ion-icon name='text' item-left></ion-icon>
+            <ion-icon name='list-box' item-left></ion-icon>
             <ion-badge item-right>{{userStatistics.totalLists}}</ion-badge>
         </ion-item>
 
         <ion-item>
             # Friends
-            <ion-icon name='quote' item-left></ion-icon>
+            <ion-icon name='contacts' item-left></ion-icon>
             <ion-badge item-right>{{userStatistics.totalFriends}}</ion-badge>
         </ion-item>
 

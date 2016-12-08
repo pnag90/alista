@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { PhotoViewer } from 'ionic-native';
 
-import { User } from '../interfaces';
+import { UserProfile } from '../interfaces';
 import { DataService } from '../services/data.service';
 
 @Component({
@@ -9,8 +9,7 @@ import { DataService } from '../services/data.service';
     template: ` <img *ngIf="imageLoaded" src="{{imageUrl}}" (click)="zoom()">`
 })
 export class UserAvatarComponent implements OnInit {
-    @Input() user: User;
-    @Input() profile: any;
+    @Input() profile: UserProfile;
     imageLoaded: boolean = false;
     imageUrl: string;
 
@@ -19,10 +18,10 @@ export class UserAvatarComponent implements OnInit {
     ngOnInit() {
         let self = this;
         let firebaseConnected: boolean = self.dataService.isFirebaseConnected(); 
-        if (self.user.uid === 'default' || !firebaseConnected) {
+        if ( self.profile === null || self.profile.uid === 'default' || !firebaseConnected) {
             self.imageUrl = 'assets/images/profile.png';
             self.imageLoaded = true;
-        } else if( self.profile===null ) {
+        /*} else if( self.profile===null ) {
             self.getUserImage().then(function (url) {
                 self.imageUrl = url.split('?')[0] + '?alt=media' + '&t=' + (new Date().getTime());
                 self.imageLoaded = true;
@@ -39,17 +38,20 @@ export class UserAvatarComponent implements OnInit {
                     self.imageLoaded = true;
                     console.log(self.imageUrl);
                 });
-            }
+            }*/
+        }else {
+            var url:string = self.profile.photoURL || 'assets/images/profile.png' ;
+            self.imageUrl = url; //url.split('?')[0] + '?alt=media' + '&t=' + (new Date().getTime());
+            self.imageLoaded = true;
         }
     }
 
     zoom() {
-        PhotoViewer.show(this.imageUrl, this.user.username, { share: false });
+        PhotoViewer.show(this.imageUrl, this.profile.username, { share: false });
     }
 
     getUserImage() {
         var self = this;
-
-        return self.dataService.getStorageRef().child('images/' + self.user.uid + '/profile.png').getDownloadURL();
+        return self.dataService.getStorageRef().child('images/' + self.profile.uid + '/profile.png').getDownloadURL();
     }
 }

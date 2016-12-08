@@ -4,7 +4,7 @@ import { NavController, ModalController, ToastController, Content, ActionSheetCo
 import { List } from '../../shared/interfaces';
 import { ListCreatePage } from '../list-create/list-create';
 import { ListItemsPage } from '../list-items/list-items';
-import { ListCommentsPage } from '../list-comments/list-comments';
+//import { ListCommentsPage } from '../list-comments/list-comments';
 import { AuthService } from '../../shared/services/auth.service';
 import { DataService } from '../../shared/services/data.service';
 import { MappingsService } from '../../shared/services/mappings.service';
@@ -51,6 +51,11 @@ export class ListsPage implements OnInit {
     public mappingsService: MappingsService,
     public itemsService: ItemsService,
     public events: Events) { 
+
+        if (!this.authService.isAuthenticated()) {
+          this.navCtrl.setRoot(LoginPage);
+        }
+
         this.profilePage = ProfilePage;
         this.loginPage = LoginPage;
         this.signUpPage = SignupPage;
@@ -107,7 +112,8 @@ export class ListsPage implements OnInit {
             user: { uid: data.rows.item(i).user, username: data.rows.item(i).username },
             items: data.rows.item(i).items,
             comments: data.rows.item(i).comments,
-            shares: data.rows.item(i).shares
+            shares: data.rows.item(i).shares, 
+            users: data.rows.item(i).users || []
           };
 
           self.lists.push(list);
@@ -273,12 +279,16 @@ export class ListsPage implements OnInit {
   }
 
 
-  viewItems(key: string, listItems: number) {
-    if (this.internetConnected) {
-      this.navCtrl.push(ListItemsPage, {
-        listKey: key,
-        listItems: listItems
-      });
+  viewItems(listKey:string) {
+    var self = this;
+    if (this.internetConnected && self.lists!=null) {
+      for (var i = 0; i < self.lists.length; i++) {
+        var list:List = self.lists[i];
+        if( listKey == list.key){
+          this.navCtrl.push(ListItemsPage, { list: list });
+          break;
+        }
+      }
     } else {
       this.notify('Network not found..');
     }
